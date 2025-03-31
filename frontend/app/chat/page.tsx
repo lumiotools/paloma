@@ -43,12 +43,7 @@ export default function ChatPage() {
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      text: `Welcome to Paloma Concierge. How can I assist you with Paloma The Grandeur today?`,
-      isUser: false,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

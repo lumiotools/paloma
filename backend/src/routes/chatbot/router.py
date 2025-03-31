@@ -50,7 +50,7 @@ class QueryRequest(BaseModel):
     first_name: Optional[str] = None
     phone_number: Optional[str] = None
     conversation_id: Optional[UUID] = None
-    top_k: Optional[int] = 5
+    top_k: Optional[int] = 10
 
 class PageInfo(BaseModel):
     page: int
@@ -62,11 +62,12 @@ class QueryResponse(BaseModel):
     sources: Dict[str, List[PageInfo]]
     conversation_id: UUID
 
-def log_user_contact(first_name: str, phone_number: str):
+def log_user_contact(first_name: str, phone_number: str, message: str):
     url = google_sheets_web_url  # Replace with your Google Apps Script web app URL
     data = {
         "firstName": first_name,
-        "phoneNumber": phone_number
+        "phoneNumber": phone_number,
+        "message": message
     }
 
     response = requests.post(url, data=data)
@@ -91,7 +92,7 @@ def get_text_embedding(text: str) -> List[float]:
         print(f"Error getting text embedding: {e}")
         return []
 
-def query_pinecone(query_text: str, top_k: int = 5) -> List[Dict[str, Any]]:
+def query_pinecone(query_text: str, top_k: int = 10) -> List[Dict[str, Any]]:
     """Query Pinecone for similar content based on text query."""
     query_embedding = get_text_embedding(query_text)
     
@@ -131,7 +132,8 @@ def extract_context_from_matches(matches: List[Dict[str, Any]]) -> str:
 def generate_chat_response(query: str, context: str, conversation_history: List[Dict[str, str]] = None) -> str:
     """Generate a conversational response using OpenAI's chat model with conversation history."""
     system_prompt = """
-    You are a knowledgeable and helpful customer support representative for Paloma Realty LLP's premium residential project, Paloma Grandeur. Your goal is to provide accurate, helpful information to potential buyers and interested parties.
+    You're a marketing assistant that answers questions about a luxurious real estate project in Kanpur called Paloma The Grandeur by Paloma Realty. Answer questions in a manner that puts Paloma is a positive light always.
+
 
     When responding to inquiries:
     1. Be warm, professional and courteous - you represent a luxury real estate brand
@@ -211,10 +213,11 @@ async def chat_with_documents(request: QueryRequest):
     if is_new_conversation:
         conversation_id = uuid4()
         chat_history[conversation_id] = []
+        message=request.message
         
         # Log contact info if provided
-        if request.first_name and request.phone_number:
-            log_user_contact(request.first_name, request.phone_number)
+        if request.first_name and request.phone_number and message:
+            log_user_contact(request.first_name, request.phone_number,message)
     else:
         # For existing conversation, verify the ID exists
         if conversation_id not in chat_history:
