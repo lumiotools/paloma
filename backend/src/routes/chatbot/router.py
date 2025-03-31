@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional
 from uuid import uuid4, UUID
 from datetime import datetime
 import re
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -15,6 +16,7 @@ load_dotenv()
 # Set up credentials
 openai_api_key = os.getenv("OPENAI_API_KEY")
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
+google_sheets_web_url=os.getenv("GOOGLE_SHEETS_WEB_URL")
 
 # Initialize OpenAI client
 client = openai.OpenAI(api_key=openai_api_key)
@@ -61,18 +63,18 @@ class QueryResponse(BaseModel):
     conversation_id: UUID
 
 def log_user_contact(first_name: str, phone_number: str):
-    """
-    Dummy function to log user contact information.
-    In a real implementation, this would connect to a CRM or database.
-    """
-    print(f"New user contact logged - Name: {first_name}, Phone: {phone_number}")
-    # In a real implementation, this would save to a database
-    
-    # Simulating successful logging
-    return {
-        "status": "success",
-        "message": f"Contact information for {first_name} logged successfully"
+    url = google_sheets_web_url  # Replace with your Google Apps Script web app URL
+    data = {
+        "firstName": first_name,
+        "phoneNumber": phone_number
     }
+
+    response = requests.post(url, data=data)
+
+    if response.status_code == 200:
+        print(f"Contact information for {first_name} logged successfully")
+    else:
+        print("Failed to log contact information")
 
 def get_text_embedding(text: str) -> List[float]:
     """Get OpenAI embedding for text."""
@@ -129,17 +131,20 @@ def extract_context_from_matches(matches: List[Dict[str, Any]]) -> str:
 def generate_chat_response(query: str, context: str, conversation_history: List[Dict[str, str]] = None) -> str:
     """Generate a conversational response using OpenAI's chat model with conversation history."""
     system_prompt = """
-    You are a helpful assistant for Paloma, providing information based on the context from documents.
-    Your task is to:
-    1. Analyze the context provided from document sections
-    2. Answer the user's question based ONLY on the information in the context
-    3. If the context doesn't contain enough information to answer fully, acknowledge that and share what you can
-    4. Be thorough and friendly in your response
-    5. Format your response in clean, well-structured text
-    
-    Use the conversation history to maintain context of the discussion, but always base your answers on the document context provided.
-    Do not make up information. If you don't know, say so.
+    You are a knowledgeable and helpful customer support representative for Paloma Realty LLP's premium residential project, Paloma Grandeur. Your goal is to provide accurate, helpful information to potential buyers and interested parties.
+
+    When responding to inquiries:
+    1. Be warm, professional and courteous - you represent a luxury real estate brand
+    2. Provide detailed and accurate information about Paloma Grandeur based ONLY on the context provided
+    3. Highlight the premium features, amenities, and unique selling points of the property when relevant
+    4. If asked about pricing, payment plans, or availability that's not in the context, politely offer to connect them with a sales representative
+    5. If you don't have specific information in the context, acknowledge this and offer to have someone follow up
+    6. Use positive, aspirational language that conveys the luxury lifestyle of Paloma Grandeur
+    7. End your responses with a question or offer for further assistance when appropriate
+
+    Remember that clients are making significant life investments, so be informative, trustworthy, and focus on creating a positive impression of Paloma Grandeur and its features.
     """
+
     
     # Initialize messages with system prompt
     messages = [{"role": "system", "content": system_prompt}]
