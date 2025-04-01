@@ -421,11 +421,11 @@ export default function ChatPage() {
             </div>
           )}
 
-          {messages.length === 0 && !isLoading && !isTyping && (
+          {/* {messages.length === 0 && !isLoading && !isTyping && (
             <div className="flex-1 flex items-center justify-center text-gray-400 text-center animate-fadeIn">
               <p>Ask a question to get started</p>
             </div>
-          )}
+          )} */}
 
           <div ref={messagesEndRef} />
         </div>
