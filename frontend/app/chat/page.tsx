@@ -335,7 +335,7 @@ export default function ChatPage() {
   };
 
   return (
-    <main className="flex min-h-[87vh] flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
+    <main className="flex min-h-[89vh] flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
       <StatusBar />
 
       <div className="w-full max-w-md pt-12 pb-24 flex-1 flex flex-col">
