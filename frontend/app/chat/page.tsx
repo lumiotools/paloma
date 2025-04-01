@@ -437,14 +437,16 @@ export default function ChatPage() {
           }`}
         >
           <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className={`w-full p-4 pr-16 rounded-full border border-gray-200 bg-white ${manuale.className} shadow-sm`}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              disabled={isLoading|| isTyping}
-            />
+            <div className={`w-full rounded-full border border-gray-200 !bg-white ${manuale.className} shadow-sm`}>
+              <input
+                type="text"
+                placeholder="Type a message..."
+                className={`w-full p-4 pr-16 rounded-full ${manuale.className}`}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                disabled={isLoading|| isTyping}
+              />
+            </div>
             <button
               type="submit"
               className={`absolute right-1 p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-[#c9ad6e] ${
