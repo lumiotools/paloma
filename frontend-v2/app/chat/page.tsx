@@ -55,43 +55,43 @@ export default function ChatPage() {
 
   // Initialize user data and check for initial question
   useEffect(() => {
-  //   const storedName = localStorage.getItem("userName");
-  //   const storedPhone = localStorage.getItem("userPhone");
-  //   const initialQuestion = localStorage.getItem("initialQuestion");
-  //   const storedConversationId = localStorage.getItem("conversationId");
+    //   const storedName = localStorage.getItem("userName");
+    //   const storedPhone = localStorage.getItem("userPhone");
+    //   const initialQuestion = localStorage.getItem("initialQuestion");
+    //   const storedConversationId = localStorage.getItem("conversationId");
 
-  //   if (!storedName || !storedPhone) {
-  //     // If no user info in localStorage, redirect to home page
-  //     router.push("/");
-  //     return;
-  //   }
+    //   if (!storedName || !storedPhone) {
+    //     // If no user info in localStorage, redirect to home page
+    //     router.push("/");
+    //     return;
+    //   }
 
-  //   setUserName(storedName);
-  //   setUserPhone(storedPhone);
+    //   setUserName(storedName);
+    //   setUserPhone(storedPhone);
 
-  //   if (storedConversationId) {
-  //     setConversationId(storedConversationId);
-  //   }
+    //   if (storedConversationId) {
+    //     setConversationId(storedConversationId);
+    //   }
 
-  //   // If there's an initial question, add it to messages and send API request
-  //   if (initialQuestion) {
-  //     // First, update the messages state with the user's question
-  //     const userMessage = initialQuestion;
+    //   // If there's an initial question, add it to messages and send API request
+    //   if (initialQuestion) {
+    //     // First, update the messages state with the user's question
+    //     const userMessage = initialQuestion;
 
-  //     // Use a callback to ensure we have the latest state
-  //     setMessages((currentMessages) => [
-  //       ...currentMessages,
-  //       { text: userMessage, isUser: true, id: `msg-${Date.now()}` },
-  //     ]);
+    //     // Use a callback to ensure we have the latest state
+    //     setMessages((currentMessages) => [
+    //       ...currentMessages,
+    //       { text: userMessage, isUser: true, id: `msg-${Date.now()}` },
+    //     ]);
 
-  //     // Then send the API request
-  //     handleInitialQuestion(initialQuestion);
+    //     // Then send the API request
+    //     handleInitialQuestion(initialQuestion);
 
-  //     // Clear the stored question
-  //     localStorage.removeItem("initialQuestion");
-  //   }
+    //     // Clear the stored question
+    //     localStorage.removeItem("initialQuestion");
+    //   }
 
-  //   // Trigger animations after component mounts
+    //   // Trigger animations after component mounts
     setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -338,11 +338,11 @@ export default function ChatPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
+    <main className="flex min-h-[80vh] flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
       <StatusBar />
 
       <div className="w-full max-w-md pt-12 pb-24 flex-1 flex flex-col">
-      {userName &&  <h1
+        <h1
           className={`font-normal mb-6 ${
             marcellusSC.className
           } transition-all duration-700 ease-out transform ${
@@ -350,8 +350,8 @@ export default function ChatPage() {
           }`}
           style={{ fontSize: "24px" }}
         >
-          Hello, {userName}
-        </h1>}
+          {userName && <>Hello, {userName}</>}
+        </h1>
 
         <div
           className={`transition-all duration-700 delay-200 ease-out transform ${
@@ -382,10 +382,10 @@ export default function ChatPage() {
                 textShadow: "0 0.2px 0.3px rgba(0,0,0,0.02)",
               }}
             >
-              <div className="prose text-center font-medium text-gray-600 text-xl ">
-              Welcome to the Paloma Concierge. Feel free to ask me any
-                  questions about Paloma The Grandeur. To begin, what is your
-                  name?
+              <div className="prose text-center font-medium text-gray-600 text-lg">
+                Welcome to the Paloma Concierge. Feel free to ask me any
+                questions about Paloma The Grandeur. To begin, what is your
+                name?
               </div>
             </div>
           </div>
