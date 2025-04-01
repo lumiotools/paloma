@@ -47,6 +47,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -99,6 +100,7 @@ export default function ChatPage() {
   // Handle initial question
   const handleInitialQuestion = async (question: string) => {
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       const request = {
@@ -204,6 +206,7 @@ export default function ChatPage() {
       ]);
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
@@ -215,7 +218,7 @@ export default function ChatPage() {
   // Handle sending a new message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || isLoading) return;
+    if (!newMessage.trim() || isLoading || isTyping) return;
 
     const userMessage = { text: newMessage, isUser: true, id: `msg-${Date.now()}` };
     setMessages([
@@ -224,6 +227,7 @@ export default function ChatPage() {
     ]);
     setNewMessage("");
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       const request = {
@@ -326,6 +330,7 @@ export default function ChatPage() {
       ]);
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
@@ -416,7 +421,7 @@ export default function ChatPage() {
             </div>
           )}
 
-          {messages.length === 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && !isTyping && (
             <div className="flex-1 flex items-center justify-center text-gray-400 text-center animate-fadeIn">
               <p>Ask a question to get started</p>
             </div>
@@ -438,14 +443,14 @@ export default function ChatPage() {
               className={`w-full p-4 pr-16 rounded-full border border-gray-200 bg-white ${manuale.className} shadow-sm`}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading|| isTyping}
             />
             <button
               type="submit"
               className={`absolute right-1 p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-[#c9ad6e] ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
+                isLoading || isTyping ? "opacity-50 cursor-not-allowed" : ""
               }`}
-              disabled={isLoading}
+              disabled={isLoading || isTyping}
             >
               <Send size={20} className="rotate-45" />
             </button>

@@ -173,10 +173,16 @@ def generate_chat_response(query: str, context: str,  conversation_id: str, conv
         conversation_id_response = {"conversation_id": conversation_id}
         yield json.dumps(conversation_id_response) + "\n" 
         
+        fullResponse = ""  # Initialize variable to store complete response
+        
         for chunk in response:
             if chunk.choices[0].delta.content:
                 data = {"message": chunk.choices[0].delta.content}
+                fullResponse += chunk.choices[0].delta.content  # Append to full response
                 yield json.dumps(data) + "\n"  # Send each chunk as a separate JSON object
+            
+        conversation = chat_history.get(conversation_id, [])
+        conversation.append(Message(role="assistant", content=fullResponse, timestamp=datetime.now()))
                     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating chat response: {str(e)}")
@@ -229,6 +235,7 @@ async def chat_with_documents(request: QueryRequest):
         if request.first_name and request.phone_number and message:
             log_user_contact(request.first_name, request.phone_number,message)
     else:
+        conversation_id = str(request.conversation_id)
         # For existing conversation, verify the ID exists
         if conversation_id not in chat_history:
             return StreamingResponse(
