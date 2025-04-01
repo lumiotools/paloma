@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from src.routes.chatbot.router import router as chatbot_router
+from src.routes.chatbot_v2.router import router as chatbot_router_v2
 
 app = FastAPI()
 
@@ -25,6 +26,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(chatbot_router,prefix="")
+app.include_router(chatbot_router_v2,prefix="/v2")
 
 
 
