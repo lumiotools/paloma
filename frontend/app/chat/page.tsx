@@ -36,6 +36,7 @@ type Message = {
   sources?: {
     [documentName: string]: Source[];
   };
+  id?: string;
 };
 
 export default function ChatPage() {
@@ -46,6 +47,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize user data and check for initial question
@@ -76,7 +78,7 @@ export default function ChatPage() {
       // Use a callback to ensure we have the latest state
       setMessages((currentMessages) => [
         ...currentMessages,
-        { text: userMessage, isUser: true },
+        { text: userMessage, isUser: true, id: `msg-${Date.now()}` },
       ]);
 
       // Then send the API request
@@ -85,6 +87,11 @@ export default function ChatPage() {
       // Clear the stored question
       localStorage.removeItem("initialQuestion");
     }
+
+    // Trigger animations after component mounts
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
   }, [router]);
 
   // Handle initial question
@@ -111,6 +118,7 @@ export default function ChatPage() {
           text: response.answer,
           isUser: false,
           sources: response.sources,
+          id: `msg-${Date.now()}`,
         },
       ]);
     } catch (error) {
@@ -121,6 +129,7 @@ export default function ChatPage() {
         {
           text: "I'm sorry, I encountered an error. Please try again later.",
           isUser: false,
+          id: `msg-${Date.now()}`,
         },
       ]);
     } finally {
@@ -141,7 +150,7 @@ export default function ChatPage() {
     const userMessage = newMessage;
     setMessages((currentMessages) => [
       ...currentMessages,
-      { text: userMessage, isUser: true },
+      { text: userMessage, isUser: true, id: `msg-${Date.now()}` },
     ]);
     setNewMessage("");
     setIsLoading(true);
@@ -171,6 +180,7 @@ export default function ChatPage() {
           text: response.answer,
           isUser: false,
           sources: response.sources,
+          id: `msg-${Date.now()}`,
         },
       ]);
     } catch (error) {
@@ -181,6 +191,7 @@ export default function ChatPage() {
         {
           text: "I'm sorry, I encountered an error. Please try again later.",
           isUser: false,
+          id: `msg-${Date.now()}`,
         },
       ]);
     } finally {
@@ -188,30 +199,42 @@ export default function ChatPage() {
     }
   };
 
-  // Debug function to log messages
-  useEffect(() => {
-    console.log("Current messages:", messages);
-  }, [messages]);
-
   return (
-    <main className="flex min-h-screen flex-col items-center px-6 py-0 relative bg-[#faf7f2]">
+    <main className="flex min-h-screen flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
       <StatusBar />
 
       <div className="w-full max-w-md pt-12 pb-24 flex-1 flex flex-col">
         <h1
-          className={`font-normal mb-6 ${marcellusSC.className}`}
+          className={`font-normal mb-6 ${
+            marcellusSC.className
+          } transition-all duration-700 ease-out transform ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
+          }`}
           style={{ fontSize: "24px" }}
         >
           Hello, {userName}
         </h1>
 
-        <PalomaLogo className="mx-auto mb-8" />
+        <div
+          className={`transition-all duration-700 delay-200 ease-out transform ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
+          }`}
+        >
+          <PalomaLogo className="mx-auto mb-8" />
+        </div>
 
-        <div className="flex-1 overflow-y-auto mb-6">
+        <div
+          className={`flex-1 overflow-y-auto mb-6 transition-all duration-700 delay-400 ease-out transform ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
           {messages.map((message, index) => (
             <div
-              key={index}
-              className={`mb-4 ${message.isUser ? "text-right" : "text-left"}`}
+              key={message.id || index}
+              className={`mb-4 ${
+                message.isUser ? "text-right" : "text-left"
+              } animate-fadeIn`}
+              style={{ animationDelay: `${index * 150}ms` }}
             >
               <div
                 className={`inline-block rounded-3xl px-6 py-4 max-w-[80%] ${
@@ -239,7 +262,7 @@ export default function ChatPage() {
           ))}
 
           {isLoading && (
-            <div className="mb-4 text-left">
+            <div className="mb-4 text-left animate-fadeIn">
               <div className="inline-block rounded-3xl px-6 py-4 bg-white text-left shadow-[0_2px_10px_rgba(0,0,0,0.08)]">
                 <div className="flex space-x-2">
                   <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse"></div>
@@ -256,12 +279,20 @@ export default function ChatPage() {
             </div>
           )}
 
+          {messages.length === 0 && !isLoading && (
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-center animate-fadeIn">
+              <p>Ask a question to get started</p>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
         <form
           onSubmit={handleSendMessage}
-          className="fixed bottom-6 left-6 right-6 max-w-md mx-auto"
+          className={`fixed bottom-6 left-6 right-6 max-w-md mx-auto transition-all duration-700 delay-600 ease-out transform ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
         >
           <div className="relative flex items-center">
             <input
@@ -274,7 +305,7 @@ export default function ChatPage() {
             />
             <button
               type="submit"
-              className={`absolute right-1 p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm ${
+              className={`absolute right-1 p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-[#c9ad6e] ${
                 isLoading ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={isLoading}
