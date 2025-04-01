@@ -44,23 +44,17 @@ export default function ChatPage() {
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      text:"Welcome to the Paloma Concierge. Feel free to ask me any questions about Paloma The Grandeur. To begin, what is your name?",
-      isUser: false,
-      id: `msg-${Date.now()}`,
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [chatId, setChatId] = useState<string | null>(null);
 
   // Initialize user data and check for initial question
-  // useEffect(() => {
+  useEffect(() => {
   //   const storedName = localStorage.getItem("userName");
   //   const storedPhone = localStorage.getItem("userPhone");
   //   const initialQuestion = localStorage.getItem("initialQuestion");
@@ -98,10 +92,10 @@ export default function ChatPage() {
   //   }
 
   //   // Trigger animations after component mounts
-  //   setTimeout(() => {
-  //     setIsLoaded(true);
-  //   }, 100);
-  // }, [router]);
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+  }, [router]);
 
   // Handle initial question
   const handleInitialQuestion = async (question: string) => {
@@ -119,7 +113,7 @@ export default function ChatPage() {
         text: question,
         isUser: true,
         id: `msg-${Date.now()}`,
-      }
+      };
 
       const streamingResponse = await sendChatMessage(request);
 
@@ -139,35 +133,34 @@ export default function ChatPage() {
           const lines = chunk.split("\n").filter((line) => line.trim());
 
           for (const line of lines) {
-              const data = JSON.parse(line);
+            const data = JSON.parse(line);
 
-              if (data.conversation_id) {
-                newConversationId = data.conversation_id;
-                if (!conversationId) {
-                  setConversationId(newConversationId);
-                  localStorage.setItem(
-                    "conversationId",
-                    newConversationId as string
-                  );
-                }
-
-                
-                setIsLoading(false);
+            if (data.conversation_id) {
+              newConversationId = data.conversation_id;
+              if (!conversationId) {
+                setConversationId(newConversationId);
+                localStorage.setItem(
+                  "conversationId",
+                  newConversationId as string
+                );
               }
 
-              if (data.message) {
-                fullMessage += data.message;
+              setIsLoading(false);
+            }
 
-                setMessages([
-                  ...messages,
-                  userMessage,
-                  { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
-                ]);
-              }
+            if (data.message) {
+              fullMessage += data.message;
 
-              if (data.error) {
-                throw new Error(data.error);
-              }
+              setMessages([
+                ...messages,
+                userMessage,
+                { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
+              ]);
+            }
+
+            if (data.error) {
+              throw new Error(data.error);
+            }
           }
         }
       } finally {
@@ -226,11 +219,12 @@ export default function ChatPage() {
     e.preventDefault();
     if (!newMessage.trim() || isLoading || isTyping) return;
 
-    const userMessage = { text: newMessage, isUser: true, id: `msg-${Date.now()}` };
-    setMessages([
-      ...messages,
-      userMessage
-    ]);
+    const userMessage = {
+      text: newMessage,
+      isUser: true,
+      id: `msg-${Date.now()}`,
+    };
+    setMessages([...messages, userMessage]);
     setNewMessage("");
     setIsLoading(true);
     setIsTyping(true);
@@ -264,38 +258,38 @@ export default function ChatPage() {
           const lines = chunk.split("\n").filter((line) => line.trim());
 
           for (const line of lines) {
-              const data = JSON.parse(line);
+            const data = JSON.parse(line);
 
-              if (data.conversation_id) {
-                newConversationId = data.conversation_id;
-                if (!conversationId) {
-                  setConversationId(newConversationId);
-                  localStorage.setItem(
-                    "conversationId",
-                    newConversationId as string
-                  );
-                }
-                setIsLoading(false);
+            if (data.conversation_id) {
+              newConversationId = data.conversation_id;
+              if (!conversationId) {
+                setConversationId(newConversationId);
+                localStorage.setItem(
+                  "conversationId",
+                  newConversationId as string
+                );
               }
+              setIsLoading(false);
+            }
 
-              if (data.user_name) {
-                setUserName(data.user_name);
-                localStorage.setItem("userName", data.user_name);
-              }
+            if (data.user_name) {
+              setUserName(data.user_name);
+              localStorage.setItem("userName", data.user_name);
+            }
 
-              if (data.message) {
-                fullMessage += data.message;
+            if (data.message) {
+              fullMessage += data.message;
 
-                setMessages([
-                  ...messages,
-                  userMessage,
-                  { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
-                ]);
-              }
+              setMessages([
+                ...messages,
+                userMessage,
+                { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
+              ]);
+            }
 
-              if (data.error) {
-                throw new Error(data.error);
-              }
+            if (data.error) {
+              throw new Error(data.error);
+            }
           }
         }
       } finally {
@@ -324,8 +318,8 @@ export default function ChatPage() {
         content: fullMessage,
       });
 
-      const newChatId = await updateChatHistory(chatId, chatMessages)
-      setChatId(newChatId)      
+      const newChatId = await updateChatHistory(chatId, chatMessages);
+      setChatId(newChatId);
     } catch (error) {
       console.error("Error sending message:", error);
 
@@ -348,7 +342,7 @@ export default function ChatPage() {
       <StatusBar />
 
       <div className="w-full max-w-md pt-12 pb-24 flex-1 flex flex-col">
-        <h1
+      {userName &&  <h1
           className={`font-normal mb-6 ${
             marcellusSC.className
           } transition-all duration-700 ease-out transform ${
@@ -357,7 +351,7 @@ export default function ChatPage() {
           style={{ fontSize: "24px" }}
         >
           Hello, {userName}
-        </h1>
+        </h1>}
 
         <div
           className={`transition-all duration-700 delay-200 ease-out transform ${
@@ -372,6 +366,29 @@ export default function ChatPage() {
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
+          <div
+            className={`mb-4 ${
+              false ? "text-right" : "text-left"
+            } animate-fadeIn`}
+            style={{ animationDelay: `${0 * 150}ms` }}
+          >
+            <div
+              className={`inline-block rounded-3xl py-4 ${manuale.className} ${
+                false
+                  ? "bg-[#fdf6e3] text-left shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[80%] px-6"
+                  : "text-left px-2"
+              }`}
+              style={{
+                textShadow: "0 0.2px 0.3px rgba(0,0,0,0.02)",
+              }}
+            >
+              <div className="prose text-center font-medium text-gray-600 text-xl ">
+              Welcome to the Paloma Concierge. Feel free to ask me any
+                  questions about Paloma The Grandeur. To begin, what is your
+                  name?
+              </div>
+            </div>
+          </div>
           {messages.map((message, index) => (
             <div
               key={message.id || index}
@@ -446,14 +463,16 @@ export default function ChatPage() {
           }`}
         >
           <div className="relative flex items-center">
-            <div className={`w-full rounded-full border border-gray-200 !bg-white ${manuale.className} shadow-sm`}>
+            <div
+              className={`w-full rounded-full border border-gray-200 !bg-white ${manuale.className} shadow-sm`}
+            >
               <input
                 type="text"
                 placeholder="Type a message..."
                 className={`w-full p-4 pr-16 rounded-full ${manuale.className}`}
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                disabled={isLoading|| isTyping}
+                disabled={isLoading || isTyping}
               />
             </div>
             <button

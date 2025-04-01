@@ -195,7 +195,7 @@ def generate_chat_response(query: str, context: str,  conversation_id: str, user
     Start with saying - "Welcome to the Paloma Concierge. Feel free to ask me any questions about Paloma The Grandeur. To begin, what is your name?"
     User then replies with their name.
     
-    Then say - "Great meeting you, [name]. What would you like to know about Paloma The Grandeur?"
+    Then say - "Great meeting you, **[name]**. What would you like to know about Paloma The Grandeur?"
     
     And keep the conversation going on.
 """
@@ -322,7 +322,7 @@ async def chat_with_documents(request: QueryRequest):
     print(f"User name found: {user_name}")
     
     if user_name:
-        log_user_contact(user_name, message)
+        log_user_contact(user_name, query)
     
     # Query Pinecone for relevant matches
     matches = query_pinecone(query, top_k)
