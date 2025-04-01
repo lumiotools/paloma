@@ -20,6 +20,11 @@ type ChatRequest = {
   top_k?: number;
 };
 
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://paloma-04fu.onrender.com";
 
@@ -67,3 +72,33 @@ export async function getConversationHistory(conversationId: string) {
     return null;
   }
 }
+
+export const updateChatHistory = async (
+  chatId: null | string,
+  messages: ChatMessage[]
+) => {
+  try {
+    const response = await fetch("/api/history", {
+      method: "POST",
+      body: JSON.stringify({
+        id: chatId,
+        messages: messages,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || "Failed to update chat history");
+    }
+
+    return data.data.id
+  } catch (error) {
+    console.error("Error updating chat history:", error);
+    return null;
+  }
+};

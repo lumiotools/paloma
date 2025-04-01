@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 import StatusBar from "@/components/status-bar";
 import PalomaLogo from "@/components/paloma-logo";
 import { Send } from "lucide-react";
-import { sendChatMessage } from "@/lib/api";
+import { ChatMessage, sendChatMessage, updateChatHistory } from "@/lib/api";
 
 const manuale = Manuale({
   subsets: ["latin"],
@@ -49,6 +49,8 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [chatId, setChatId] = useState<string | null>(null);
 
   // Initialize user data and check for initial question
   useEffect(() => {
@@ -121,6 +123,26 @@ export default function ChatPage() {
           id: `msg-${Date.now()}`,
         },
       ]);
+      
+      const chatMessages: ChatMessage[] = messages.map((message)=>{
+        return {
+          role: message.isUser ? "user" : "assistant",
+          content: message.text,
+        }
+      })
+
+      chatMessages.push({
+        role: "user",
+        content: question,
+      });
+      chatMessages.push({
+        role: "assistant",
+        content: response.answer,
+      });
+
+      const newChatId = await updateChatHistory(chatId, chatMessages)
+
+      setChatId(newChatId)
     } catch (error) {
       console.error("Error sending initial message:", error);
 
@@ -183,6 +205,25 @@ export default function ChatPage() {
           id: `msg-${Date.now()}`,
         },
       ]);
+
+      const chatMessages: ChatMessage[] = messages.map((message)=>{
+        return {
+          role: message.isUser ? "user" : "assistant",
+          content: message.text,
+        }
+      })
+
+      chatMessages.push({
+        role: "user",
+        content: userMessage,
+      });
+      chatMessages.push({
+        role: "assistant",
+        content: response.answer,
+      });
+
+      const newChatId = await updateChatHistory(chatId, chatMessages)
+      setChatId(newChatId)      
     } catch (error) {
       console.error("Error sending message:", error);
 
