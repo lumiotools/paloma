@@ -27,35 +27,40 @@ export interface ChatMessage {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://paloma-04fu.onrender.com";
-
-export async function sendChatMessage(
-  request: ChatRequest
-): Promise<ChatResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+  
+  export async function sendChatMessage(
+    request: ChatRequest
+  ): Promise<ReadableStream<Uint8Array>> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+  
+      // Return the stream directly
+      return response.body!;
+      
+    } catch (error) {
+      console.error("Error sending chat message:", error);
+      // In case of error, return a fallback stream (empty string or similar)
+      const encoder = new TextEncoder();
+      const fallbackStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode("Error occurred, please try again later."));
+          controller.close();
+        }
+      });
+      return fallbackStream;
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error sending chat message:", error);
-    // Fallback response for development/demo purposes
-    return {
-      answer:
-        "I'm sorry, I couldn't connect to the knowledge base at the moment. Please try again later.",
-      conversation_id: request.conversation_id || "temp-id",
-    };
   }
-}
-
+  
 export async function getConversationHistory(conversationId: string) {
   try {
     const response = await fetch(

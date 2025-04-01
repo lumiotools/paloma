@@ -3,12 +3,14 @@ import openai
 from pinecone import Pinecone
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Body, Depends
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from uuid import uuid4, UUID
 from datetime import datetime
 import re
 import requests
+import json
 
 # Load environment variables
 load_dotenv()
@@ -129,7 +131,7 @@ def extract_context_from_matches(matches: List[Dict[str, Any]]) -> str:
     
     return "\n".join(context_parts)
 
-def generate_chat_response(query: str, context: str, conversation_history: List[Dict[str, str]] = None) -> str:
+def generate_chat_response(query: str, context: str,  conversation_id: str, conversation_history: List[Dict[str, str]] = None) -> str:
     """Generate a conversational response using OpenAI's chat model with conversation history."""
     system_prompt = """
     You're a marketing assistant for **Paloma The Grandeur**, a luxurious real estate project in Kanpur by **Paloma Realty**. Your task is to answer all questions in a way that highlights the positive aspects of Paloma The Grandeur. Ensure the responses are informative, engaging, and always showcase the premium nature of the property.
@@ -165,10 +167,17 @@ def generate_chat_response(query: str, context: str, conversation_history: List[
             model="gpt-4o-mini", # You can use "gpt-4o" for better responses
             messages=messages,
             temperature=0.3,  # Lower temperature for more factual responses
-            max_tokens=1000
-        )
+            max_tokens=1000,
+            stream=True
+        )            
+        conversation_id_response = {"conversation_id": conversation_id}
+        yield json.dumps(conversation_id_response) + "\n" 
         
-        return response.choices[0].message.content
+        for chunk in response:
+            if chunk.choices[0].delta.content:
+                data = {"message": chunk.choices[0].delta.content}
+                yield json.dumps(data) + "\n"  # Send each chunk as a separate JSON object
+                    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating chat response: {str(e)}")
 
@@ -200,7 +209,7 @@ def format_sources(matches: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, An
     
     return sources
 
-@router.post("/chat", response_model=QueryResponse)
+@router.post("/chat")
 async def chat_with_documents(request: QueryRequest):
     """API endpoint to chat with document content - handles both initial and follow-up queries."""
     query = request.message
@@ -212,7 +221,7 @@ async def chat_with_documents(request: QueryRequest):
     
     # If new conversation, create a new ID and check for contact info
     if is_new_conversation:
-        conversation_id = uuid4()
+        conversation_id = str(uuid4())
         chat_history[conversation_id] = []
         message=request.message
         
@@ -222,9 +231,11 @@ async def chat_with_documents(request: QueryRequest):
     else:
         # For existing conversation, verify the ID exists
         if conversation_id not in chat_history:
-            raise HTTPException(
-                status_code=404,
-                detail="Conversation not found. Please start a new conversation without providing a conversation_id."
+            return StreamingResponse(
+                iter([json.dumps({
+                    "error": "Conversation not found. Please start a new conversation without providing a conversation_id."
+                }) + "\n"]), 
+                media_type="text/event-stream"
             )
     
     # Get conversation history
@@ -247,6 +258,13 @@ async def chat_with_documents(request: QueryRequest):
         answer = "I couldn't find any relevant information in the documents to answer your question."
         # Add assistant's response to history
         conversation.append(Message(role="assistant", content=answer, timestamp=datetime.now()))
+        return StreamingResponse(
+            iter([
+                json.dumps({"conversation_id": conversation_id}) + "\n",
+                json.dumps({"message": answer}) + "\n"
+                ]),
+            media_type="text/event-stream"
+        )
         return {
             "answer": answer,
             "sources": {},
@@ -255,9 +273,11 @@ async def chat_with_documents(request: QueryRequest):
     
     # Extract context from matches
     context = extract_context_from_matches(matches)
-    
-    # Generate response using OpenAI with conversation history
-    response = generate_chat_response(query, context, openai_conversation_format)
+
+    return StreamingResponse(
+        generate_chat_response(query, context, conversation_id, openai_conversation_format), 
+        media_type="text/event-stream"
+    )
     
     # Add assistant's response to history
     conversation.append(Message(role="assistant", content=response, timestamp=datetime.now()))

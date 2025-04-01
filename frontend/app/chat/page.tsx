@@ -107,29 +107,77 @@ export default function ChatPage() {
         phone_number: userPhone || localStorage.getItem("userPhone") || "",
       };
 
-      const response = await sendChatMessage(request);
+      const userMessage = {
+        text: question,
+        isUser: true,
+        id: `msg-${Date.now()}`,
+      }
 
-      // Save conversation ID
-      setConversationId(response.conversation_id);
-      localStorage.setItem("conversationId", response.conversation_id);
+      const streamingResponse = await sendChatMessage(request);
 
-      // Add bot response to messages
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          text: response.answer,
-          isUser: false,
-          sources: response.sources,
-          id: `msg-${Date.now()}`,
-        },
+      const reader = streamingResponse.getReader();
+      let newConversationId: string | null = null;
+      let fullMessage = "";
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          // Convert the chunk to text
+          const chunk = new TextDecoder().decode(value);
+
+          // Split by newlines in case multiple JSON objects arrived
+          const lines = chunk.split("\n").filter((line) => line.trim());
+
+          for (const line of lines) {
+              const data = JSON.parse(line);
+
+              if (data.conversation_id) {
+                newConversationId = data.conversation_id;
+                if (!conversationId) {
+                  setConversationId(newConversationId);
+                  localStorage.setItem(
+                    "conversationId",
+                    newConversationId as string
+                  );
+                }
+
+                
+                setIsLoading(false);
+              }
+
+              if (data.message) {
+                fullMessage += data.message;
+
+                setMessages([
+                  ...messages,
+                  userMessage,
+                  { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
+                ]);
+              }
+
+              if (data.error) {
+                throw new Error(data.error);
+              }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
+      setMessages([
+        ...messages,
+        userMessage,
+        { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
       ]);
-      
-      const chatMessages: ChatMessage[] = messages.map((message)=>{
+
+      const chatMessages: ChatMessage[] = messages.map((message) => {
         return {
           role: message.isUser ? "user" : "assistant",
           content: message.text,
-        }
-      })
+        };
+      });
 
       chatMessages.push({
         role: "user",
@@ -137,12 +185,12 @@ export default function ChatPage() {
       });
       chatMessages.push({
         role: "assistant",
-        content: response.answer,
+        content: fullMessage,
       });
 
-      const newChatId = await updateChatHistory(chatId, chatMessages)
+      const newChatId = await updateChatHistory(chatId, chatMessages);
 
-      setChatId(newChatId)
+      setChatId(newChatId);
     } catch (error) {
       console.error("Error sending initial message:", error);
 
@@ -169,17 +217,17 @@ export default function ChatPage() {
     e.preventDefault();
     if (!newMessage.trim() || isLoading) return;
 
-    const userMessage = newMessage;
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      { text: userMessage, isUser: true, id: `msg-${Date.now()}` },
+    const userMessage = { text: newMessage, isUser: true, id: `msg-${Date.now()}` };
+    setMessages([
+      ...messages,
+      userMessage
     ]);
     setNewMessage("");
     setIsLoading(true);
 
     try {
       const request = {
-        message: userMessage,
+        message: newMessage,
         ...(conversationId
           ? { conversation_id: conversationId }
           : {
@@ -188,38 +236,79 @@ export default function ChatPage() {
             }),
       };
 
-      const response = await sendChatMessage(request);
+      const streamingResponse = await sendChatMessage(request);
 
-      // Save conversation ID if it's new
-      if (!conversationId) {
-        setConversationId(response.conversation_id);
-        localStorage.setItem("conversationId", response.conversation_id);
+      const reader = streamingResponse.getReader();
+      let newConversationId: string | null = null;
+      let fullMessage = "";
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          // Convert the chunk to text
+          const chunk = new TextDecoder().decode(value);
+
+          // Split by newlines in case multiple JSON objects arrived
+          const lines = chunk.split("\n").filter((line) => line.trim());
+
+          for (const line of lines) {
+              const data = JSON.parse(line);
+
+              if (data.conversation_id) {
+                newConversationId = data.conversation_id;
+                if (!conversationId) {
+                  setConversationId(newConversationId);
+                  localStorage.setItem(
+                    "conversationId",
+                    newConversationId as string
+                  );
+                }
+
+                
+                setIsLoading(false);
+              }
+
+              if (data.message) {
+                fullMessage += data.message;
+
+                setMessages([
+                  ...messages,
+                  userMessage,
+                  { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
+                ]);
+              }
+
+              if (data.error) {
+                throw new Error(data.error);
+              }
+          }
+        }
+      } finally {
+        reader.releaseLock();
       }
 
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          text: response.answer,
-          isUser: false,
-          sources: response.sources,
-          id: `msg-${Date.now()}`,
-        },
+      setMessages([
+        ...messages,
+        userMessage,
+        { text: fullMessage, isUser: false, id: `msg-${Date.now()}` },
       ]);
 
-      const chatMessages: ChatMessage[] = messages.map((message)=>{
+      const chatMessages: ChatMessage[] = messages.map((message) => {
         return {
           role: message.isUser ? "user" : "assistant",
           content: message.text,
-        }
-      })
+        };
+      });
 
       chatMessages.push({
         role: "user",
-        content: userMessage,
+        content: newMessage,
       });
       chatMessages.push({
         role: "assistant",
-        content: response.answer,
+        content: fullMessage,
       });
 
       const newChatId = await updateChatHistory(chatId, chatMessages)
@@ -278,12 +367,12 @@ export default function ChatPage() {
               style={{ animationDelay: `${index * 150}ms` }}
             >
               <div
-                className={`inline-block rounded-3xl px-6 py-4 max-w-[80%] ${
+                className={`inline-block rounded-3xl py-4 ${
                   manuale.className
                 } ${
                   message.isUser
-                    ? "bg-[#fdf6e3] text-left shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-                    : "bg-white text-left shadow-[0_2px_10px_rgba(0,0,0,0.08)]"
+                    ? "bg-[#fdf6e3] text-left shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[80%] px-6"
+                    : "text-left px-2"
                 }`}
                 style={{
                   textShadow: "0 0.2px 0.3px rgba(0,0,0,0.02)",
@@ -292,8 +381,15 @@ export default function ChatPage() {
                 {message.isUser ? (
                   <div>{message.text}</div>
                 ) : (
-                  <div className="markdown-content">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <div className="prose">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <h1 className={`text-3xl font-bold`} {...props} />
+                        ),
+                      }}
+                    >
                       {message.text}
                     </ReactMarkdown>
                   </div>
