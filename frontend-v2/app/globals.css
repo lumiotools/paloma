@@ -125,3 +125,18 @@ textarea {
     @apply bg-background text-foreground;
   }
 }
+
+
+.vapi-btn {
+  display: none !important;
+}
+
+/* Optional: If you want to hide specific states as well */
+.vapi-btn-is-idle,
+.vapi-btn-is-active,
+.vapi-btn-is-loading,
+.vapi-btn-is-speaking,
+.vapi-btn-pill,
+.vapi-btn-round {
+  display: none !important;
+}
