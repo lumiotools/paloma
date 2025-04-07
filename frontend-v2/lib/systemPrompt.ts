@@ -51,304 +51,124 @@ Wing A has:
 - A super built-up area (super area) of 6,624.00 square feet.
 
 Wing B has:
-
-
-A carpet area of 2,827.66 square feet.
-
-
-A built-up area (BUA) of 4,213.86 square feet.
-
-
-A super built-up area (super area) of 5,490.00 square feet.
-
+- A carpet area of 2,827.66 square feet.
+- A built-up area (BUA) of 4,213.86 square feet.
+- A super built-up area (super area) of 5,490.00 square feet.
 
 Wing C has:
 
-
-A carpet area of 2,891.10 square feet.
-
-
-A built-up area (BUA) of 4,576.56 square feet.
-
-
-A super built-up area (super area) of 5,940.00 square feet.
+- A carpet area of 2,891.10 square feet.
+- A built-up area (BUA) of 4,576.56 square feet.
+- A super built-up area (super area) of 5,940.00 square feet.
 
 
 Note: One square meter equals 10.7639 square feet. All floor areas are subject to change based on final construction.
 
 📐 BUILDING HEIGHT DETAILS
-The project has three basements, each with a vertical height of 5.0 meters.
-
-
-The ground floor has a height of 10.0 meters.
-
-
-The club floor has a height of 6.0 meters.
-
-
-The service floor is 2.0 meters in height.
-
-
-The project consists of 31 typical residential floors, each having a height of 3.6 meters.
-
-
-The terrace level has a height of 4.0 meters.
-
-
+- The project has three basements, each with a vertical height of 5.0 meters.
+- The ground floor has a height of 10.0 meters.
+- The club floor has a height of 6.0 meters.
+- The service floor is 2.0 meters in height.
+- The project consists of 31 typical residential floors, each having a height of 3.6 meters.
+- The terrace level has a height of 4.0 meters.
 
 📑 KDA APPROVAL DETAILS
-The KDA (Kanpur Development Authority) file number is KDA/BP/22-23/0182.
-
-
-The KDA building permit number is Group Housing/05672/KDA/BP/22-23/0182/19022024.
-
-
-The KDA permit issue date is 08-May-2024.
-
-
-The permit is valid up to 07-May-2029.
-
-
+- The KDA (Kanpur Development Authority) file number is KDA/BP/22-23/0182.
+- The KDA building permit number is Group Housing/05672/KDA/BP/22-23/0182/19022024.
+- The KDA permit issue date is 08-May-2024.
+- The permit is valid up to 07-May-2029.
 
 🏗 RERA REGISTRATION DETAILS
-The RERA (Uttar Pradesh Real Estate Regulatory Authority) registration number is UPRERAPRJ646361/07/2023.
-
-
-The permit date under RERA is 29-Jul-2024.
-
-
-The declared completion date of the project is 07-May-2029.
-
-
+- The RERA (Uttar Pradesh Real Estate Regulatory Authority) registration number is UPRERAPRJ646361/07/2023.
+- The permit date under RERA is 29-Jul-2024.
+- The declared completion date of the project is 07-May-2029.
 
 📜 NOC (NO OBJECTION CERTIFICATE) STATUS
-KDA (Kanpur Development Authority): NOC obtained
-
-
-RERA: NOC obtained
-
-
-Environment: NOC obtained
-
-
-Fire Department: NOC obtained
-
-
-IGBC (Green Building Council): NOC obtained
-
-
-Jal Kal (Water Department): NOC obtained
-
-
-KESCO (Electricity Department): NOC obtained
-
-
-AAI (Airports Authority of India): NOC obtained
-
-
-ASI (Archaeological Survey of India): NOC obtained
-
-
-Forest Department: NOC obtained
-
-
-Traffic Department: NOC obtained
-
-
-UP Metro Rail Corporation: NOC obtained
-
-
-Tree Cutting Permission: NOC obtained
-
-
-Structural Vetting: Completed and approved
-
-
-Pollution Control Board Clearance: In process
-
-
+- KDA (Kanpur Development Authority): NOC obtained
+- RERA: NOC obtained
+- Environment: NOC obtained
+- Fire Department: NOC obtained
+- IGBC (Green Building Council): NOC obtained
+- Jal Kal (Water Department): NOC obtained
+- KESCO (Electricity Department): NOC obtained
+- AAI (Airports Authority of India): NOC obtained
+- ASI (Archaeological Survey of India): NOC obtained
+- Forest Department: NOC obtained
+- Traffic Department: NOC obtained
+- UP Metro Rail Corporation: NOC obtained
+- Tree Cutting Permission: NOC obtained
+- Structural Vetting: Completed and approved
+- Pollution Control Board Clearance: In process
 
 ↔️ SETBACK DIMENSIONS
-The front setback from the plot boundary is 20 meters.
-
-
-The back setback is 36 meters.
-
-
-The left-side setback is 25 meters.
-
-
-The right-side setback is 33 meters.
-
-
+- The front setback from the plot boundary is 20 meters.
+- The back setback is 36 meters.
+- The left-side setback is 25 meters.
+- The right-side setback is 33 meters.
 
 🧱 VAASTU-COMPLIANT DESIGN LAYOUT
-Northeast zone is designated as the Pooja (prayer) room, which supports spiritual energy and calmness.
-
-
-North-Northeast terrace is designed for meditation, relaxation, and recreation, benefiting from the water element.
-
-
-North-facing living room is ideal for family gatherings and a cool environment.
-
-
-Northeast bedroom is best for children or retired parents due to its alignment with peace and harmony.
-
-
-Southeast zone is the proper location for the kitchen, in line with the fire element to promote health.
-
-
-Southeast servant quarters help maintain staff energy and efficiency.
-
-
-South-facing bedroom is appropriate for the second authority figure in the family, such as a sibling.
-
-
-Southwest bedroom, linked with earth energy, is best for the head of the family for stability and leadership.
-
-
-The central area of the house is designed to be open and load-free, ensuring balance and circulation.
-
-
-Northwest bedroom is best suited for guests, daughters, or newly married couples, as it supports airflow and dynamic energy.
-
-
+- Northeast zone is designated as the Pooja (prayer) room, which supports spiritual energy and calmness.
+- North-Northeast terrace is designed for meditation, relaxation, and recreation, benefiting from the water element.
+- North-facing living room is ideal for family gatherings and a cool environment.
+- Northeast bedroom is best for children or retired parents due to its alignment with peace and harmony.
+- Southeast zone is the proper location for the kitchen, in line with the fire element to promote health.
+- Southeast servant quarters help maintain staff energy and efficiency.
+- South-facing bedroom is appropriate for the second authority figure in the family, such as a sibling.
+- Southwest bedroom, linked with earth energy, is best for the head of the family for stability and leadership.
+- The central area of the house is designed to be open and load-free, ensuring balance and circulation.
+- Northwest bedroom is best suited for guests, daughters, or newly married couples, as it supports airflow and dynamic energy.
 
 🌳 LANDSCAPE & TERRACE FEATURES
-Leisure Deck
-
-
-Step Seating
-
-
-Swing Cove
-
-
-Interactive Gathering Space
-
-
-Lounger Deck
-
-
-Open-Air Theater
-
-
-Pebble Walkway
-
-
-Pause Deck
-
-
-Private Jacuzzi
-
-
-Star Gazing Deck
-
-
-Planter Island
-
-
-Buffer Plantation
-
-
+- Leisure Deck
+- Step Seating
+- Swing Cove
+- Interactive Gathering Space
+- Lounger Deck
+- Open-Air Theater
+- Pebble Walkway
+- Pause Deck
+- Private Jacuzzi
+- Star Gazing Deck
+- Planter Island
+- Buffer Plantation
 
 🏢 SPECIFICATIONS
-Lift Lobby includes tile/granite/marble flooring, wall paneling with emulsion or marble/granite, and gypsum false ceilings with acrylic paint.
-
-
-Common and Fire Staircases use granite/marble flooring and emulsion-painted walls and ceilings. Common stairs have MS railings, and fire stairs have glass railings.
-
-
-The building includes 6 passenger lifts and 3 service lifts.
-
-
-Window frames are made from powder-coated aluminum or UPVC with clear glass.
-
-
-External wall finishes use exterior-grade paints from branded manufacturers.
-
-
-All electrical components in common areas are ISI-marked, including switches, sockets, circuit breakers, copper wiring, and conduits.
-
-
-Plumbing uses ISI-marked CPVC pipes with standard valves and accessories.
-
-
-Sanitary ware is not provided by the promoter.
-
-
-Security infrastructure includes CCTV, electronic surveillance systems, and internal intercom communication.
-
-
-Provisions for Electric Vehicle (EV) charging stations and air conditioning systems (HVAC) are included.
-
-
+- Lift Lobby includes tile/granite/marble flooring, wall paneling with emulsion or marble/granite, and gypsum false ceilings with acrylic paint.
+- Common and Fire Staircases use granite/marble flooring and emulsion-painted walls and ceilings. Common stairs have MS railings, and fire stairs have glass railings.
+- The building includes 6 passenger lifts and 3 service lifts.
+- Window frames are made from powder-coated aluminum or UPVC with clear glass.
+- External wall finishes use exterior-grade paints from branded manufacturers.
+- All electrical components in common areas are ISI-marked, including switches, sockets, circuit breakers, copper wiring, and conduits.
+- Plumbing uses ISI-marked CPVC pipes with standard valves and accessories.
+- Sanitary ware is not provided by the promoter.
+- Security infrastructure includes CCTV, electronic surveillance systems, and internal intercom communication.
+-Provisions for Electric Vehicle (EV) charging stations and air conditioning systems (HVAC) are included.
 
 🧸 AMENITIES
 Indoor Facilities:
-Multipurpose Hall
-
-
-Business Center
-
+- Multipurpose Hall
+- Business Center
 
 Indoor Games Room
-
-
-Children’s Creche
-
-
-Fully Equipped Gymnasium
-
-
-24x7 Operational Kitchen
-
-
-Billiards and Snooker Room
-
-
-Cards Room
-
-
-Squash Court
-
-
-Swimming Pool with Changing Rooms
-
-
-Temperature-Controlled All-Weather Pool
-
+- Children’s Creche
+- Fully Equipped Gymnasium
+- 24x7 Operational Kitchen
+- Billiards and Snooker Room
+- Cards Room
+- Squash Court
+- Swimming Pool with Changing Rooms
+- Temperature-Controlled All-Weather Pool
 
 Outdoor Facilities:
-Dedicated Jogging Track
-
-
-Kids' Play Area
-
-
-On-site Temple
-
-
-Shallow Decorative Water Body
-
-
-Pet-Friendly Park Area
-
-
-Gathering and Festive Plaza
-
-
-Step Seating Plaza
-
-
-Amphitheater-Style Sitting
-
-
-Multi-Play Sports Court
-
-
-Yoga and Aerobics Zone
-
-
+- Dedicated Jogging Track
+- Kids' Play Area
+- On-site Temple
+- Shallow Decorative Water Body
+- Pet-Friendly Park Area
+- Gathering and Festive Plaza
+- Step Seating Plaza
+- Amphitheater-Style Sitting
+- Multi-Play Sports Court
+- Yoga and Aerobics Zone
 
 `;
