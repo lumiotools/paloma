@@ -1719,6 +1719,7 @@ export default function ChatPage() {
   const audioStreamRef = useRef<MediaStream | null>(null)
   const audioRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+const languageRef = useRef<"hindi" | "english">("hindi")
 
   // Audio visualization refs
   const lastActivityTime = useRef<number>(0)
@@ -2069,6 +2070,7 @@ export default function ChatPage() {
         dataChannelRef,
         conversationHistoryRef,
         clientSecret, // Pass the client secret here
+        languageRef,
       )
 
       setIsRecording(true)
