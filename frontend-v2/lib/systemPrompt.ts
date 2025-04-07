@@ -142,7 +142,7 @@ Note: One square meter equals 10.7639 square feet. All floor areas are subject t
 - Plumbing uses ISI-marked CPVC pipes with standard valves and accessories.
 - Sanitary ware is not provided by the promoter.
 - Security infrastructure includes CCTV, electronic surveillance systems, and internal intercom communication.
--Provisions for Electric Vehicle (EV) charging stations and air conditioning systems (HVAC) are included.
+- Provisions for Electric Vehicle (EV) charging stations and air conditioning systems (HVAC) are included.
 
 🧸 AMENITIES
 Indoor Facilities:

@@ -254,3 +254,4 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection): Promise<voi
     }, 5000)
   })
 }
+

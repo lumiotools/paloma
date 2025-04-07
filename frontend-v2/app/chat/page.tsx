@@ -2816,7 +2816,7 @@ export default function ChatPage() {
               }}
             >
               <div className="prose text-center font-medium text-gray-600 text-lg">
-                Feel free to ask me any questions about Paloma The Grandeur
+                Feel free to ask me any questions about Paloma The Grandeur.
               </div>
             </div>
           </div>
