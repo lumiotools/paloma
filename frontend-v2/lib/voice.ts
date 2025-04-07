@@ -40,7 +40,7 @@ export async function startRealtimeSession(
     // Send the offer to OpenAI's server to establish the connection
     const baseUrl = "https://api.openai.com/v1/realtime"
     const model = "gpt-4o-realtime-preview"
-    
+
     const sessionResponse = await fetch(`${baseUrl}?model=${model}`, {
       method: "POST",
       body: connection.localDescription?.sdp,
@@ -67,13 +67,12 @@ export async function startRealtimeSession(
     // Send an initial message to start the conversation when data channel opens
     dataChannel.onopen = () => {
       console.log("Data channel opened")
-      
-      // Fire an event of type conversation.item.create
+
       const createEvent = {
         type: "response.create",
-        response: {
-        },
+        response: {},
       }
+
       dataChannel.send(JSON.stringify(createEvent))
     }
 
@@ -96,16 +95,13 @@ export async function stopRealtimeSession(
       return
     }
 
-    // Stop media tracks
     connection.getSenders().forEach((sender) => sender.track?.stop())
 
-    // Close the data channel if it exists
     if (dataChannelRef.current) {
       dataChannelRef.current.close()
       dataChannelRef.current = null
     }
 
-    // Stop audio playback and release resources
     const audioEl = document.querySelector("audio")
     if (audioEl) {
       audioEl.pause()
@@ -117,22 +113,10 @@ export async function stopRealtimeSession(
       }
     }
 
-    // Close the connection
     connection.ontrack = null
     connection.onicecandidate = null
     connection.oniceconnectionstatechange = null
     connection.close()
-
-    // // Update the voice trial usage
-    // await fetch("/api/voice/update-usage", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     secondsUsed: 300 - timeLeft, // Calculate seconds used
-    //   }),
-    // })
 
     console.log("Realtime session stopped")
   } catch (error) {
@@ -156,55 +140,61 @@ function setupDataChannel(dataChannel: RTCDataChannel, conversationHistoryRef: R
       console.log("Received message:", data)
 
       if (data.type === "response.audio_transcript.done") {
-        // Handle AI response transcript
         console.log("AI: ", data.transcript)
-        
-        // Store in conversation history
+
         conversationHistoryRef.current.push({
           role: "assistant",
           content: data.transcript,
         })
-        
-        // Create a text message format for the UI
+
         const textMessage = {
           type: "text",
           text: data.transcript,
         }
-        
-        // Dispatch a custom event for the UI to handle
-        const customEvent = new CustomEvent("ai-message", { 
-          detail: textMessage 
+
+        const customEvent = new CustomEvent("ai-message", {
+          detail: textMessage,
         })
         window.dispatchEvent(customEvent)
-      } 
+      }
+
       else if (data.type === "conversation.item.input_audio_transcription.completed") {
-        // Handle user speech transcript
         console.log("User: ", data.transcript)
-        
-        // Store in conversation history
+
         conversationHistoryRef.current.push({
           role: "user",
           content: data.transcript,
         })
-        
-        // Create a transcript message format for the UI
+
         const transcriptMessage = {
           type: "transcript",
           transcript: data.transcript,
         }
-        
-        // Dispatch a custom event for the UI to handle
-        const customEvent = new CustomEvent("user-transcript", { 
-          detail: transcriptMessage 
+
+        const customEvent = new CustomEvent("user-transcript", {
+          detail: transcriptMessage,
         })
         window.dispatchEvent(customEvent)
+
+        // 🔊 Detect user mood or intent and adapt voice
+        const voice = chooseVoiceFromTranscript(data.transcript)
+        console.log("Setting AI voice to:", voice)
+
+        const voiceEvent = {
+          type: "response.settings.update",
+          settings: {
+            voice, // 🎤 Set AI voice here
+          },
+        }
+
+        dataChannel.send(JSON.stringify(voiceEvent))
       }
+
       else if (data.type === "error") {
         console.error("Error from OpenAI:", data.error)
-        
-        // Dispatch error event
-        const errorEvent = new CustomEvent("ai-error", { 
-          detail: { error: data.error } 
+
+        const errorEvent = new CustomEvent("ai-error", {
+          detail: { error: data.error },
         })
         window.dispatchEvent(errorEvent)
       }
@@ -214,7 +204,20 @@ function setupDataChannel(dataChannel: RTCDataChannel, conversationHistoryRef: R
   }
 }
 
-// Helper function to send a text message through the data channel
+// 🧠 Voice selector based on user transcript
+function chooseVoiceFromTranscript(transcript: string): string {
+  const text = transcript.toLowerCase()
+  if (text.includes("hello") || text.includes("friendly")) return "nova"
+  if (text.includes("robot") || text.includes("tech")) return "shimmer"
+  if (text.includes("calm") || text.includes("meditation")) return "echo"
+  if (text.includes("joke") || text.includes("funny")) return "fable"
+  if (text.includes("serious") || text.includes("business")) return "onyx"
+
+  // Default
+  return "nova"
+}
+
+// Send a text message through the data channel
 export function sendTextMessage(dataChannel: RTCDataChannel, text: string): boolean {
   if (dataChannel.readyState === "open") {
     const message = {
@@ -229,7 +232,7 @@ export function sendTextMessage(dataChannel: RTCDataChannel, text: string): bool
   }
 }
 
-// Helper function to wait for ICE gathering to complete
+// Wait for ICE gathering to complete
 function waitForIceGatheringComplete(connection: RTCPeerConnection): Promise<void> {
   return new Promise((resolve) => {
     if (connection.iceGatheringState === "complete") {
@@ -246,7 +249,6 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection): Promise<voi
 
     connection.addEventListener("icegatheringstatechange", checkState)
 
-    // Set a timeout in case ICE gathering takes too long
     setTimeout(() => {
       connection.removeEventListener("icegatheringstatechange", checkState)
       console.warn("ICE gathering timed out, continuing anyway")
@@ -254,4 +256,3 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection): Promise<voi
     }, 5000)
   })
 }
-
