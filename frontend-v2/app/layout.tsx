@@ -13,7 +13,10 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Paloma Realty",
   description: "Paloma Realty Concierge",
-    generator: 'v0.dev'
+    generator: 'v0.dev',
+    icons: {
+      icon: '/favicon.png',
+    }
 }
 
 export default function RootLayout({
@@ -23,6 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+      <link
+          rel="icon"
+          href="/favicon.png"
+          media="(prefers-color-scheme: light)"
+        />
+      </head>
       <body className={`${inter.className} ${playfair.variable}`}>{children}</body>
     </html>
   )
@@ -31,3 +41,4 @@ export default function RootLayout({
 
 
 import './globals.css'
+import HeadScripts from "@/components/scripts"
