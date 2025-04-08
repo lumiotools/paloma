@@ -1,6 +1,7 @@
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import { VOICE_SYSTEM_PROMPT } from "@/lib/systemPrompt"
+import connectDB from "@/config/database"
 
 export const GET = async () => {
   try {
@@ -10,6 +11,7 @@ export const GET = async () => {
     //   throw new Error("User IP not found")
     // }
 
+    await connectDB();
 
     const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",

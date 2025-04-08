@@ -1,5 +1,6 @@
 import type React from "react"
 import { VOICE_SYSTEM_PROMPT } from "@/lib/systemPrompt"
+import { type ChatMessage, updateChatHistory } from "./api"
 
 // Function to start a realtime session with OpenAI using WebRTC
 export async function startRealtimeSession(
@@ -69,6 +70,8 @@ export async function stopRealtimeSession(
       return
     }
 
+    logVoiceEvent("voice_session_ended")
+
     connection.getSenders().forEach((sender) => sender.track?.stop())
 
     if (dataChannelRef.current) {
@@ -106,6 +109,8 @@ function setupDataChannel(
 
   dataChannel.onclose = () => {
     console.log("Data channel closed")
+
+    logVoiceEvent("user_voice_session_started")
   }
 
   dataChannel.onerror = (error) => {
@@ -115,6 +120,7 @@ function setupDataChannel(
   dataChannel.onopen = () => {
     console.log("Data channel opened")
     // Don't send create event immediately. Wait for first user transcript
+    logVoiceEvent("user_voice_session_started")
   }
 
   dataChannel.onmessage = (event) => {
@@ -257,4 +263,31 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection): Promise<voi
       resolve()
     }, 5000)
   })
+}
+
+
+export async function logVoiceEvent(
+  eventType: string,
+  transcript?: string,
+  audioData?: string,
+  chatId?: string | null,
+) {
+  try {
+    // Create a system message for the voice log
+    const voiceLogMessage: ChatMessage = {
+      role: "assistant", // Using "assistant" as the role since "system" isn't in your ChatMessage type
+      content: transcript || `Voice event: ${eventType}`,
+    }
+
+    // Get existing chat history or create a new one
+    const messages: ChatMessage[] = [voiceLogMessage]
+
+    // Update the chat history with the voice log
+    await updateChatHistory(chatId ?? null, messages)
+
+    console.log(`Voice event logged: ${eventType}`, transcript ? `Transcript: ${transcript.substring(0, 50)}...` : "")
+  } catch (error) {
+    console.error("Error logging voice event:", error)
+    // Don't throw - logging should not interrupt the main flow
+  }
 }
