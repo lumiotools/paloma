@@ -71,7 +71,7 @@ export async function stopRealtimeSession(
       return
     }
 
-    await logVoiceEvent("voice_session_ended", undefined, undefined, chatId)
+    // await logVoiceEvent("voice_session_ended", undefined, undefined, chatId)
 
     connection.getSenders().forEach((sender) => sender.track?.stop())
 
@@ -127,40 +127,40 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection) {
 }
 
 // Function to log voice events to the database
-export async function logVoiceEvent(
-  eventType: string,
-  transcript?: string,
-  audioData?: string,
-  chatId?: string | null,
-) {
-  try {
-    // Create a message for the voice log that includes the event type
-    const voiceLogMessage: ChatMessage = {
-      role: "assistant", // Using "assistant" as the role since "system" isn't in your ChatMessage type
-      content: transcript ? `Voice event: ${eventType}\nTranscript: ${transcript}` : `Voice event: ${eventType}`,
-    }
+// export async function logVoiceEvent(
+//   eventType: string,
+//   transcript?: string,
+//   audioData?: string,
+//   chatId?: string | null,
+// ) {
+//   try {
+//     // Create a message for the voice log that includes the event type
+//     const voiceLogMessage: ChatMessage = {
+//       role: "assistant", // Using "assistant" as the role since "system" isn't in your ChatMessage type
+//       content: transcript ? `Voice event: ${eventType}\nTranscript: ${transcript}` : `Voice event: ${eventType}`,
+//     }
 
-    console.log("Logging voice event:", voiceLogMessage)
+//     console.log("Logging voice event:", voiceLogMessage)
 
-    // Get existing chat history or create a new one
-    const messages: ChatMessage[] = [voiceLogMessage]
+//     // Get existing chat history or create a new one
+//     const messages: ChatMessage[] = [voiceLogMessage]
 
-    // Update the chat history with the voice log
-    const newChatId = await updateChatHistory(chatId ?? null, messages)
+//     // Update the chat history with the voice log
+//     const newChatId = await updateChatHistory(chatId ?? null, messages)
 
-    console.log(
-      `Voice event logged: ${eventType}`,
-      transcript ? `Transcript: ${transcript.substring(0, 50)}...` : "",
-      `ChatId: ${newChatId}`,
-    )
+//     console.log(
+//       `Voice event logged: ${eventType}`,
+//       transcript ? `Transcript: ${transcript.substring(0, 50)}...` : "",
+//       `ChatId: ${newChatId}`,
+//     )
 
-    return newChatId
-  } catch (error) {
-    console.error("Error logging voice event:", error)
-    // Don't throw - logging should not interrupt the main flow
-    return chatId
-  }
-}
+//     return newChatId
+//   } catch (error) {
+//     console.error("Error logging voice event:", error)
+//     // Don't throw - logging should not interrupt the main flow
+//     return chatId
+//   }
+// }
 
 function setupDataChannel(
   dataChannel: RTCDataChannel,
@@ -173,7 +173,7 @@ function setupDataChannel(
 
   dataChannel.onclose = () => {
     console.log("Data channel closed")
-    logVoiceEvent("voice_session_ended", undefined, undefined, currentChatId)
+    // logVoiceEvent("voice_session_ended", undefined, undefined, currentChatId)
   }
 
   dataChannel.onerror = (error) => {
@@ -183,7 +183,7 @@ function setupDataChannel(
   dataChannel.onopen = async () => {
     console.log("Data channel opened")
     // Log session start and store the returned chat ID
-    currentChatId = await logVoiceEvent("voice_session_started", undefined, undefined, currentChatId)
+    // currentChatId = await logVoiceEvent("voice_session_started", undefined, undefined, currentChatId)
   }
 
   dataChannel.onmessage = async (event) => {
@@ -200,7 +200,7 @@ function setupDataChannel(
         })
 
         // Log user transcript and update chat ID
-        currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
+        // currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
 
         const transcriptMessage = {
           type: "transcript",
@@ -247,7 +247,7 @@ function setupDataChannel(
         })
 
         // Log AI transcript and update chat ID
-        currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
+        // currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
 
         const textMessage = {
           type: "text",
