@@ -2071,6 +2071,7 @@ const languageRef = useRef<"hindi" | "english">("hindi")
         conversationHistoryRef,
         clientSecret, // Pass the client secret here
         languageRef,
+        chatId,
       )
 
       setIsRecording(true)
@@ -2646,6 +2647,7 @@ const languageRef = useRef<"hindi" | "english">("hindi")
       try {
         // Try to update chat history but continue even if it fails
         const newChatId = await updateChatHistory(chatId, chatMessages)
+        console.log("Updated chat history with new chat ID:", newChatId)
         if (newChatId) {
           setChatId(newChatId)
         }
