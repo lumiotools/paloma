@@ -2861,12 +2861,16 @@ export default function ChatPage() {
   return (
     <main className="flex min-h-[80vh] flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
       <StatusBar />
-      <div className="absolute top-4 right-4 z-10">
+      <div
+        className={`absolute top-4 right-4 z-10 transition-all duration-700 delay-300 ease-out transform ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
+        }`}
+      >
         <a
           href={`https://wa.me/+919628888887`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center rounded-full bg-[#d4b978] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#c9ad6e]"
+          className={`inline-flex items-center justify-center rounded-full bg-[#d4b978] ${manuale.className} px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-[#c9ad6e]`}
         >
           Contact Sales
         </a>
