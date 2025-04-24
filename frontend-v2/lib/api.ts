@@ -108,6 +108,8 @@ export const updateChatHistory = async (
         return chatId; // Return the existing chatId if we have one
       }
 
+      console.log("CHAGSGSG",data);
+
       return data.data.id;
     } catch (apiError) {
       console.error("Error calling history API:", apiError);

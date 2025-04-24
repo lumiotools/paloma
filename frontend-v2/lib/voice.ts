@@ -71,7 +71,7 @@ export async function stopRealtimeSession(
       return
     }
 
-    // await logVoiceEvent("voice_session_ended", undefined, undefined, chatId)
+    await logVoiceEvent("voice_session_ended", undefined, undefined, chatId)
 
     connection.getSenders().forEach((sender) => sender.track?.stop())
 
@@ -100,7 +100,6 @@ export async function stopRealtimeSession(
   }
 }
 
-// Helper function to wait for ICE gathering to complete
 function waitForIceGatheringComplete(connection: RTCPeerConnection) {
   return new Promise<void>((resolve) => {
     if (connection.iceGatheringState === "complete") {
@@ -117,7 +116,6 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection) {
 
     connection.addEventListener("icegatheringstatechange", checkState)
 
-    // Set a timeout in case ICE gathering takes too long
     setTimeout(() => {
       connection.removeEventListener("icegatheringstatechange", checkState)
       console.warn("ICE gathering timed out, continuing with available candidates")
@@ -126,42 +124,46 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection) {
   })
 }
 
-// Function to log voice events to the database
-// export async function logVoiceEvent(
-//   eventType: string,
-//   transcript?: string,
-//   audioData?: string,
-//   chatId?: string | null,
-// ) {
-//   try {
-//     // Create a message for the voice log that includes the event type
-//     const voiceLogMessage: ChatMessage = {
-//       role: "assistant", // Using "assistant" as the role since "system" isn't in your ChatMessage type
-//       content: transcript ? `Voice event: ${eventType}\nTranscript: ${transcript}` : `Voice event: ${eventType}`,
-//     }
+// ✅ Function to log voice events to the database
+export async function logVoiceEvent(
+  eventType: string,
+  transcript?: string,
+  audioData?: string,
+  chatId?: string | null,
+) {
+  try {
+    console.log("TRSN", transcript)
+    // if (!transcript) {
+    //   console.warn("No transcript provided. Skipping log.")
+    //   return chatId
+    // }
+    
 
-//     console.log("Logging voice event:", voiceLogMessage)
+    // Determine if it's from user or assistant
+    const role: "user" | "assistant" = eventType === "user_speech" ? "user" : "assistant"
 
-//     // Get existing chat history or create a new one
-//     const messages: ChatMessage[] = [voiceLogMessage]
+    const voiceLogMessage: ChatMessage = {
+      role,
+      content: transcript ?? "Test", // ✅ Just the transcript text
+    }
 
-//     // Update the chat history with the voice log
-//     const newChatId = await updateChatHistory(chatId ?? null, messages)
+    console.log("Logging voice message:", voiceLogMessage)
 
-//     console.log(
-//       `Voice event logged: ${eventType}`,
-//       transcript ? `Transcript: ${transcript.substring(0, 50)}...` : "",
-//       `ChatId: ${newChatId}`,
-//     )
+    const messages: ChatMessage[] = [voiceLogMessage]
 
-//     return newChatId
-//   } catch (error) {
-//     console.error("Error logging voice event:", error)
-//     // Don't throw - logging should not interrupt the main flow
-//     return chatId
-//   }
-// }
+    const newChatId = await updateChatHistory(chatId ?? null, messages)
 
+    console.log(`Voice message logged. Role: ${role}, ChatId: ${newChatId}`)
+
+    return newChatId
+  } catch (error) {
+    console.error("Error logging voice message:", error)
+    return chatId
+  }
+}
+
+
+// ✅ Setup data channel with chatId handling
 function setupDataChannel(
   dataChannel: RTCDataChannel,
   conversationHistoryRef: React.MutableRefObject<object[]>,
@@ -171,9 +173,11 @@ function setupDataChannel(
   let hasSentCreateEvent = false
   let currentChatId = chatId
 
+  // console.log("Setting up data channel...", conversationHistoryRef);
+
   dataChannel.onclose = () => {
     console.log("Data channel closed")
-    // logVoiceEvent("voice_session_ended", undefined, undefined, currentChatId)
+    logVoiceEvent("voice_session_ended", undefined, undefined, currentChatId)
   }
 
   dataChannel.onerror = (error) => {
@@ -182,37 +186,28 @@ function setupDataChannel(
 
   dataChannel.onopen = async () => {
     console.log("Data channel opened")
-    // Log session start and store the returned chat ID
-    // currentChatId = await logVoiceEvent("voice_session_started", undefined, undefined, currentChatId)
+    currentChatId = await logVoiceEvent("voice_session_created", undefined, undefined, currentChatId)
+    console.log("ChatId:", currentChatId)
   }
 
   dataChannel.onmessage = async (event) => {
     try {
       const data = JSON.parse(event.data)
-      console.log("Received message:", data)
+      console.log("Received message :", data)
 
       if (data.type === "conversation.item.input_audio_transcription.completed") {
         console.log("User:", data.transcript)
 
-        conversationHistoryRef.current.push({
-          role: "user",
-          content: data.transcript,
-        })
+        conversationHistoryRef.current.push({ role: "user", content: data.transcript })
 
-        // Log user transcript and update chat ID
-        // currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
+        currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
 
-        const transcriptMessage = {
-          type: "transcript",
-          transcript: data.transcript,
-        }
+        window.dispatchEvent(
+          new CustomEvent("user-transcript", {
+            detail: { type: "transcript", transcript: data.transcript },
+          }),
+        )
 
-        const customEvent = new CustomEvent("user-transcript", {
-          detail: transcriptMessage,
-        })
-        window.dispatchEvent(customEvent)
-
-        // Detect language from user transcript
         const detectedLang = detectLanguage(data.transcript)
         if (languageRef.current !== detectedLang) {
           languageRef.current = detectedLang
@@ -222,48 +217,31 @@ function setupDataChannel(
         const voice = chooseVoiceFromLanguage(languageRef.current)
         console.log("Setting AI voice to:", voice)
 
-        const voiceEvent = {
-          type: "response.settings.update",
-          settings: { voice },
-        }
+        dataChannel.send(JSON.stringify({ type: "response.settings.update", settings: { voice } }))
 
-        dataChannel.send(JSON.stringify(voiceEvent))
-
-        // Now we send the response.create to start AI generation
         if (!hasSentCreateEvent) {
           hasSentCreateEvent = true
-          const createEvent = {
-            type: "response.create",
-            response: {},
-          }
-          dataChannel.send(JSON.stringify(createEvent))
+          dataChannel.send(JSON.stringify({ type: "response.create", response: {} }))
         }
       } else if (data.type === "response.audio_transcript.done") {
         console.log("AI:", data.transcript)
 
-        conversationHistoryRef.current.push({
-          role: "assistant",
-          content: data.transcript,
-        })
+        conversationHistoryRef.current.push({ role: "assistant", content: data.transcript })
 
-        // Log AI transcript and update chat ID
-        // currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
+        currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
 
-        const textMessage = {
-          type: "text",
-          text: data.transcript,
-        }
-
-        const customEvent = new CustomEvent("ai-message", {
-          detail: textMessage,
-        })
-        window.dispatchEvent(customEvent)
+        window.dispatchEvent(
+          new CustomEvent("ai-message", {
+            detail: { type: "text", text: data.transcript },
+          }),
+        )
       } else if (data.type === "error") {
         console.error("Error from OpenAI:", data.error)
-        const errorEvent = new CustomEvent("ai-error", {
-          detail: { error: data.error },
-        })
-        window.dispatchEvent(errorEvent)
+        window.dispatchEvent(
+          new CustomEvent("ai-error", {
+            detail: { error: data.error },
+          }),
+        )
       }
     } catch (error) {
       console.error("Error parsing message:", error)
@@ -272,15 +250,9 @@ function setupDataChannel(
 }
 
 function detectLanguage(text: string): "hindi" | "english" {
-  // Simple language detection logic (can be improved)
-  const hindiKeywords = ["नमस्ते", "आप", "क्या"] // Example Hindi keywords
+  const hindiKeywords = ["नमस्ते", "आप", "क्या"]
   const hindiCount = hindiKeywords.filter((keyword) => text.includes(keyword)).length
-
-  if (hindiCount > 0) {
-    return "hindi"
-  } else {
-    return "english"
-  }
+  return hindiCount > 0 ? "hindi" : "english"
 }
 
 function chooseVoiceFromLanguage(language: "hindi" | "english"): string {

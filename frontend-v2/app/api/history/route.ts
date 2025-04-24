@@ -5,7 +5,8 @@ import { headers } from "next/headers";
 
 export const POST = async (request: NextRequest) => {
   try {
-    const userIP = (await headers()).get("x-forwarded-for");
+    // const userIP = '45.117.109.61';
+    const userIP = (await headers()).get("x-forwarded-for")
 
     if (userIP?.split(".").length !== 4) {
       throw new Error("User IP not found");
