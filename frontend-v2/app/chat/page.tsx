@@ -1863,9 +1863,23 @@ export default function ChatPage() {
   }, [isVoiceMode, isRecording]);
 
   // Scroll to bottom when messages change
+  // useEffect(() => {
+  //   // Only auto-scroll if:
+  //   // 1. The last message is from the user, or
+  //   // 2. The AI has finished responding (isTyping is false)
+  //   const lastMessage = messages[messages.length - 1]
+  //   if ((lastMessage?.isUser || !isTyping) && messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+  //   }
+  // }, [messages, isTyping])
+
+  // Effect 1: Scroll when messages change and the last message is from the user
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage?.isUser && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messages])
 
   // Set up data channel message handler
   useEffect(() => {
