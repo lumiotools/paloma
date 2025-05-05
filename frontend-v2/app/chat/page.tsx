@@ -430,114 +430,92 @@ export default function ChatPage() {
   // RTCPeerConnection handling
   const handleStartRecording = async () => {
     if (connectionRef.current) {
-      console.warn("Connection already exists. Restarting...")
-      await handleStopRecording()
+      console.warn("Connection already exists. Restarting...");
+      await handleStopRecording();
     }
 
     try {
-      setIsProcessing(true)
+      setIsProcessing(true);
+
 
       // Get session token from the new endpoint
-      const tokenResponse = await fetch("/api/voice")
-      console.log("API response:", tokenResponse)
+      const tokenResponse = await fetch("/api/voice");
+      console.log("AOPIS ", tokenResponse);
 
       if (!tokenResponse.ok) {
-        throw new Error(`Failed to get session token: ${tokenResponse.statusText}`)
+        throw new Error(
+          `Failed to get session token: ${tokenResponse.statusText}`
+        );
       }
 
-      const tokenData = await tokenResponse.json()
-      console.log("TokenData", tokenData)
+      const tokenData = await tokenResponse.json();
+      console.log("TokenData", tokenData);
+      // if (!tokenData.token) {
+      //   throw new Error("Failed to get voice session token")
+      // }
 
-      const clientSecret = tokenData.data.voiceToken
-      console.log("Got client secret for OpenAI session")
+      const clientSecret = tokenData.data.voiceToken;
+      console.log("Got client secret for OpenAI session");
 
-      // Create a new RTCPeerConnection with more compatible STUN servers
+      // Create a new RTCPeerConnection
       const newConnection = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
-          { urls: "stun:stun2.l.google.com:19302" },
-          { urls: "stun:stun3.l.google.com:19302" },
-          { urls: "stun:stun4.l.google.com:19302" },
         ],
-      })
-      connectionRef.current = newConnection
+      });
+      connectionRef.current = newConnection;
 
       // Set up connection event handlers
       newConnection.onicecandidate = (event) => {
-        console.log("ICE candidate:", event.candidate)
-      }
+        console.log("ICE candidate:", event.candidate);
+      };
 
       newConnection.onconnectionstatechange = () => {
-        console.log("Connection state:", newConnection.connectionState)
+        console.log("Connection state:", newConnection.connectionState);
         if (newConnection.connectionState === "connected") {
-          setIsProcessing(false)
-          setIsListening(true)
-          startUserAudioVisualization()
-        } else if (["disconnected", "failed", "closed"].includes(newConnection.connectionState)) {
-          setIsListening(false)
-          stopUserAudioVisualization()
+          setIsProcessing(false);
+          setIsListening(true);
+          startUserAudioVisualization();
+        } else if (
+          ["disconnected", "failed", "closed"].includes(
+            newConnection.connectionState
+          )
+        ) {
+          setIsListening(false);
+          stopUserAudioVisualization();
         }
-      }
+      };
 
       newConnection.ondatachannel = (event) => {
-        console.log("Data channel received:", event.channel)
-        dataChannelRef.current = event.channel
-        setupDataChannelHandlers(event.channel)
-      }
-
-      // Try to get user media with explicit constraints for mobile
-      try {
-        // First try to access the microphone with specific mobile-friendly constraints
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-            // Lower sample rate for better mobile compatibility
-            sampleRate: 22050,
-          },
-          video: false,
-        })
-
-        // Store the stream for later use
-        audioStreamRef.current = stream
-
-        // Add audio tracks to the peer connection
-        stream.getAudioTracks().forEach((track) => {
-          newConnection.addTrack(track, stream)
-        })
-
-        console.log("Successfully accessed microphone")
-      } catch (mediaError) {
-        console.error("Error accessing microphone:", mediaError)
-        // Fall back to simulated audio if we can't access the microphone
-        console.log("Falling back to simulated audio")
-      }
+        console.log("Data channel received:", event.channel);
+        dataChannelRef.current = event.channel;
+        setupDataChannelHandlers(event.channel);
+      };
 
       // Start the realtime session with the client secret
       await startRealtimeSession(
         newConnection,
         dataChannelRef,
         conversationHistoryRef,
-        clientSecret,
+        clientSecret, // Pass the client secret here
         languageRef,
-        chatId,
-      )
+        chatId
+      );
 
-      setIsRecording(true)
+      setIsRecording(true);
     } catch (error) {
-      console.error("Error starting recording:", error)
-      setApiError((error as Error).message || "Failed to start voice chat")
-      setIsProcessing(false)
+      console.error("Error starting recording:", error);
+      setApiError((error as Error).message || "Failed to start voice chat");
+      setIsProcessing(false);
 
       // Clean up on error
       if (connectionRef.current) {
-        connectionRef.current.close()
-        connectionRef.current = null
+        connectionRef.current.close();
+        connectionRef.current = null;
       }
     }
-  }
+  };
 
   const handleStopRecording = async () => {
     setIsListening(false);
@@ -1274,7 +1252,7 @@ export default function ChatPage() {
   }, [isVoiceMode]);
 
   return (
-    <main className="flex min-h-[80vh] flex-col items-center px-6 py-0 relative bg-[#faf7f2] overflow-hidden">
+    <main className="flex min-h-[80vh] flex-col items-center sm:px-6 px-4 py-0 relative bg-[#faf7f2] overflow-hidden">
       <StatusBar />
       <div
         className={`absolute top-4 right-4 z-10 transition-all duration-700 delay-300 ease-out transform ${
@@ -1285,7 +1263,7 @@ export default function ChatPage() {
           href={`https://wa.me/+919628888887`}
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-flex items-center justify-center rounded-full bg-[#d4b978] ${manuale.className} px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-[#c9ad6e]`}
+          className={`inline-flex items-center justify-center rounded-full bg-[#d4b978] ${manuale.className} px-3 py-1.5 sm:px-4 sm:py-2 font-semibold text-white shadow-sm transition-colors hover:bg-[#c9ad6e] sm:text-base`}
         >
           Contact Sales
         </a>
@@ -1298,7 +1276,7 @@ export default function ChatPage() {
           } transition-all duration-700 ease-out transform ${
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
           }`}
-          style={{ fontSize: "24px" }}
+          style={{ fontSize: "clamp(20px, 5vw, 24px)" }}
         >
           {userName && <>Hello, {userName}</>}
         </h1>
@@ -1308,7 +1286,7 @@ export default function ChatPage() {
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
           }`}
         >
-          <PalomaLogo className="mx-auto mb-8" />
+          <PalomaLogo className="mx-auto mb-6 sm:mb-8 w-auto h-auto max-w-[80%]" />
         </div>
 
         <div
@@ -1323,14 +1301,14 @@ export default function ChatPage() {
             <div
               className={`inline-block rounded-3xl py-4 ${manuale.className} ${
                 false
-                  ? "bg-[#fdf6e3] shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[80%] px-6"
+                  ? "bg-[#fdf6e3] shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[80%] sm:max-w-[80%] px-4 sm:px-6"
                   : "px-2"
               }`}
               style={{
                 textShadow: "0 0.2px 0.3px rgba(0,0,0,0.02)",
               }}
             >
-              <div className="prose text-center font-medium text-gray-600 text-lg">
+              <div className="prose text-center font-medium text-gray-600 text-base sm:text-lg">
                 Feel free to ask me any questions about Paloma The Grandeur.
               </div>
             </div>
@@ -1344,11 +1322,9 @@ export default function ChatPage() {
               style={{ animationDelay: `${index * 150}ms` }}
             >
               <div
-                className={`inline-block rounded-3xl py-4 ${
-                  manuale.className
-                } ${
+                className={`inline-block rounded-3xl py-3 sm:py-4 ${manuale.className} ${
                   message.isUser
-                    ? "bg-[#fdf6e3] text-left shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[80%] px-6"
+                    ? "bg-[#fdf6e3] text-left shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[85%] sm:max-w-[80%] px-4 sm:px-6"
                     : "text-left px-2"
                 }`}
                 style={{
@@ -1363,7 +1339,7 @@ export default function ChatPage() {
                       remarkPlugins={[remarkGfm]}
                       components={{
                         h1: ({ node, ...props }) => (
-                          <h1 className={`text-3xl font-bold`} {...props} />
+                          <h1 className={`sm:text-3xl text-xl font-bold`} {...props} />
                         ),
                       }}
                     >

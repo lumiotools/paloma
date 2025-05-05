@@ -1,3 +1,4 @@
+'use client'
 import Image from "next/image";
 
 export default function PalomaLogo({ className = "" }: { className?: string }) {
@@ -9,7 +10,7 @@ export default function PalomaLogo({ className = "" }: { className?: string }) {
           alt="Paloma Realty Logo"
           width={200}
           height={200}
-          className="object-contain mx-auto"
+          className="object-containw-[200px] h-auto mx-auto"
           priority
           unoptimized
         />
