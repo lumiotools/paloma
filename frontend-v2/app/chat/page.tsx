@@ -538,6 +538,7 @@ export default function ChatPage() {
       }
     }
   }
+  
 
   const handleStopRecording = async () => {
     setIsListening(false);
