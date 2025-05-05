@@ -32,7 +32,6 @@ export default function RootLayout({
       <body className={`${inter.className} ${playfair.variable}`} suppressHydrationWarning>
         {children}
         {/* Move HeadScripts to the end of body to ensure it runs after hydration */}
-        <HeadScripts />
       </body>
     </html>
   )
