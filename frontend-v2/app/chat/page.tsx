@@ -430,115 +430,92 @@ export default function ChatPage() {
   // RTCPeerConnection handling
   const handleStartRecording = async () => {
     if (connectionRef.current) {
-      console.warn("Connection already exists. Restarting...")
-      await handleStopRecording()
+      console.warn("Connection already exists. Restarting...");
+      await handleStopRecording();
     }
 
     try {
-      setIsProcessing(true)
+      setIsProcessing(true);
+
 
       // Get session token from the new endpoint
-      const tokenResponse = await fetch("/api/voice")
-      console.log("API response:", tokenResponse)
+      const tokenResponse = await fetch("/api/voice");
+      console.log("AOPIS ", tokenResponse);
 
       if (!tokenResponse.ok) {
-        throw new Error(`Failed to get session token: ${tokenResponse.statusText}`)
+        throw new Error(
+          `Failed to get session token: ${tokenResponse.statusText}`
+        );
       }
 
-      const tokenData = await tokenResponse.json()
-      console.log("TokenData", tokenData)
+      const tokenData = await tokenResponse.json();
+      console.log("TokenData", tokenData);
+      // if (!tokenData.token) {
+      //   throw new Error("Failed to get voice session token")
+      // }
 
-      const clientSecret = tokenData.data.voiceToken
-      console.log("Got client secret for OpenAI session")
+      const clientSecret = tokenData.data.voiceToken;
+      console.log("Got client secret for OpenAI session");
 
-      // Create a new RTCPeerConnection with more compatible STUN servers
+      // Create a new RTCPeerConnection
       const newConnection = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
-          { urls: "stun:stun2.l.google.com:19302" },
-          { urls: "stun:stun3.l.google.com:19302" },
-          { urls: "stun:stun4.l.google.com:19302" },
         ],
-      })
-      connectionRef.current = newConnection
+      });
+      connectionRef.current = newConnection;
 
       // Set up connection event handlers
       newConnection.onicecandidate = (event) => {
-        console.log("ICE candidate:", event.candidate)
-      }
+        console.log("ICE candidate:", event.candidate);
+      };
 
       newConnection.onconnectionstatechange = () => {
-        console.log("Connection state:", newConnection.connectionState)
+        console.log("Connection state:", newConnection.connectionState);
         if (newConnection.connectionState === "connected") {
-          setIsProcessing(false)
-          setIsListening(true)
-          startUserAudioVisualization()
-        } else if (["disconnected", "failed", "closed"].includes(newConnection.connectionState)) {
-          setIsListening(false)
-          stopUserAudioVisualization()
+          setIsProcessing(false);
+          setIsListening(true);
+          startUserAudioVisualization();
+        } else if (
+          ["disconnected", "failed", "closed"].includes(
+            newConnection.connectionState
+          )
+        ) {
+          setIsListening(false);
+          stopUserAudioVisualization();
         }
-      }
+      };
 
       newConnection.ondatachannel = (event) => {
-        console.log("Data channel received:", event.channel)
-        dataChannelRef.current = event.channel
-        setupDataChannelHandlers(event.channel)
-      }
-
-      // Try to get user media with explicit constraints for mobile
-      try {
-        // First try to access the microphone with specific mobile-friendly constraints
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-            // Lower sample rate for better mobile compatibility
-            sampleRate: 22050,
-          },
-          video: false,
-        })
-
-        // Store the stream for later use
-        audioStreamRef.current = stream
-
-        // Add audio tracks to the peer connection
-        stream.getAudioTracks().forEach((track) => {
-          newConnection.addTrack(track, stream)
-        })
-
-        console.log("Successfully accessed microphone")
-      } catch (mediaError) {
-        console.error("Error accessing microphone:", mediaError)
-        // Fall back to simulated audio if we can't access the microphone
-        console.log("Falling back to simulated audio")
-      }
+        console.log("Data channel received:", event.channel);
+        dataChannelRef.current = event.channel;
+        setupDataChannelHandlers(event.channel);
+      };
 
       // Start the realtime session with the client secret
       await startRealtimeSession(
         newConnection,
         dataChannelRef,
         conversationHistoryRef,
-        clientSecret,
+        clientSecret, // Pass the client secret here
         languageRef,
-        chatId,
-      )
+        chatId
+      );
 
-      setIsRecording(true)
+      setIsRecording(true);
     } catch (error) {
-      console.error("Error starting recording:", error)
-      setApiError((error as Error).message || "Failed to start voice chat")
-      setIsProcessing(false)
+      console.error("Error starting recording:", error);
+      setApiError((error as Error).message || "Failed to start voice chat");
+      setIsProcessing(false);
 
       // Clean up on error
       if (connectionRef.current) {
-        connectionRef.current.close()
-        connectionRef.current = null
+        connectionRef.current.close();
+        connectionRef.current = null;
       }
     }
-  }
-  
+  };
 
   const handleStopRecording = async () => {
     setIsListening(false);
