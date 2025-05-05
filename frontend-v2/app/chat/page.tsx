@@ -1374,7 +1374,7 @@ export default function ChatPage() {
 
         <form
           onSubmit={handleSendMessage}
-          className={`fixed bottom-6 left-6 right-6 max-w-md mx-auto transition-all duration-700 delay-600 ease-out transform ${
+          className={`fixed bottom-6 left-6 right-6  max-w-md mx-auto transition-all duration-700 delay-600 ease-out transform ${
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -1382,26 +1382,27 @@ export default function ChatPage() {
             <button
               type="button"
               onClick={toggleVoiceMode}
-              className="absolute left-1 p-3 rounded-full text-[#d4b978] flex items-center justify-center transition-all duration-300 hover:bg-[#fdf6e3]"
+              className="absolute left-1 p-2 sm:p-3 rounded-full text-[#d4b978] flex items-center justify-center transition-all duration-300 hover:bg-[#fdf6e3]"
+
             >
-              <Mic size={20} />
+              <Mic size={20} className="sm:w-5 sm:h-5"/>
             </button>
             <input
               type="text"
               placeholder="Type a message..."
-              className={`w-full p-4 pl-16 pr-16 rounded-full border border-gray-200 bg-white ${manuale.className} shadow-sm`}
+              className={`w-full p-3 sm:p-4 pl-12 sm:pl-16 pr-12 sm:pr-16 rounded-full border border-gray-200 bg-white ${manuale.className} shadow-sm text-sm sm:text-base`}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               disabled={isLoading || isVoiceMode}
             />
             <button
               type="submit"
-              className={`absolute right-1 p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-[#c9ad6e] ${
+              className={`absolute right-1 p-2 sm:p-3 rounded-full bg-[#d4b978] text-white flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-[#c9ad6e] ${
                 isLoading || isVoiceMode ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={isLoading || isVoiceMode}
             >
-              <Send size={20} className="rotate-45" />
+              <Send size={20} className="sm:w-5 sm:h-5 rotate-45" />
             </button>
           </div>
         </form>
@@ -1411,11 +1412,11 @@ export default function ChatPage() {
         <div className="fixed inset-0 bg-[#1a1a1a]/90 flex flex-col items-center justify-center z-50 animate-fadeIn">
           <div className="absolute top-4 right-4 z-20">
             <button
-              className="w-10 h-10 rounded-full bg-[#333333]/80 flex items-center justify-center text-white hover:bg-[#333333] transition-colors"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#333333]/80 flex items-center justify-center text-white hover:bg-[#333333] transition-colors"
               onClick={closeVoiceModal}
               aria-label="Close voice modal"
             >
-              <X size={24} />
+              <X size={24} className="sm:w-6 sm:h-6" />
             </button>
           </div>
 
