@@ -25,15 +25,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-      <link
-          rel="icon"
-          href="/favicon.png"
-          media="(prefers-color-scheme: light)"
-        />
+        <link rel="icon" href="/favicon.png" media="(prefers-color-scheme: light)" />
       </head>
-      <body className={`${inter.className} ${playfair.variable}`}>{children}</body>
+      <body className={`${inter.className} ${playfair.variable}`} suppressHydrationWarning>
+        {children}
+        {/* Move HeadScripts to the end of body to ensure it runs after hydration */}
+        <HeadScripts />
+      </body>
     </html>
   )
 }
