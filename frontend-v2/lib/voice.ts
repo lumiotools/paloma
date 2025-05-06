@@ -125,6 +125,43 @@ function waitForIceGatheringComplete(connection: RTCPeerConnection) {
 }
 
 // ✅ Function to log voice events to the database
+// export async function logVoiceEvent(
+//   eventType: string,
+//   transcript?: string,
+//   audioData?: string,
+//   chatId?: string | null,
+// ) {
+//   try {
+//     console.log("TRSN", transcript)
+//     // if (!transcript) {
+//     //   console.warn("No transcript provided. Skipping log.")
+//     //   return chatId
+//     // }
+    
+
+//     // Determine if it's from user or assistant
+//     const role: "user" | "assistant" = eventType === "user_speech" ? "user" : "assistant"
+
+//     const voiceLogMessage: ChatMessage = {
+//       role,
+//       content: transcript ?? "Test", // ✅ Just the transcript text
+//     }
+
+//     console.log("Logging voice message:", voiceLogMessage)
+
+//     const messages: ChatMessage[] = [voiceLogMessage]
+
+//     const newChatId = await updateChatHistory(chatId ?? null, messages)
+
+//     console.log(`Voice message logged. Role: ${role}, ChatId: ${newChatId}`)
+
+//     return newChatId
+//   } catch (error) {
+//     console.error("Error logging voice message:", error)
+//     return chatId
+//   }
+// }
+
 export async function logVoiceEvent(
   eventType: string,
   transcript?: string,
@@ -132,22 +169,28 @@ export async function logVoiceEvent(
   chatId?: string | null,
 ) {
   try {
-    console.log("TRSN", transcript)
-    // if (!transcript) {
-    //   console.warn("No transcript provided. Skipping log.")
-    //   return chatId
-    // }
-    
+    console.log(`Logging voice event: ${eventType}, Transcript: ${transcript?.substring(0, 30)}...`)
+
+    // Skip logging for session events if no transcript
+    if ((eventType === "voice_session_created" || eventType === "voice_session_ended") && !transcript) {
+      return chatId
+    }
+
+    // Don't log empty transcripts for speech events
+    if ((eventType === "user_speech" || eventType === "ai_speech") && (!transcript || transcript.trim() === "")) {
+      console.warn(`Empty transcript for ${eventType}. Skipping log.`)
+      return chatId
+    }
 
     // Determine if it's from user or assistant
     const role: "user" | "assistant" = eventType === "user_speech" ? "user" : "assistant"
 
     const voiceLogMessage: ChatMessage = {
       role,
-      content: transcript ?? "Test", // ✅ Just the transcript text
+      content: transcript || "", // Just the transcript text
     }
 
-    console.log("Logging voice message:", voiceLogMessage)
+    console.log(`Logging voice message: ${role} - ${transcript?.substring(0, 30)}...`)
 
     const messages: ChatMessage[] = [voiceLogMessage]
 
@@ -164,6 +207,91 @@ export async function logVoiceEvent(
 
 
 // ✅ Setup data channel with chatId handling
+// function setupDataChannel(
+//   dataChannel: RTCDataChannel,
+//   conversationHistoryRef: React.MutableRefObject<object[]>,
+//   languageRef: React.MutableRefObject<"hindi" | "english">,
+//   chatId?: string | null,
+// ): void {
+//   let hasSentCreateEvent = false
+//   let currentChatId = chatId
+
+//   // console.log("Setting up data channel...", conversationHistoryRef);
+
+//   dataChannel.onclose = () => {
+//     console.log("Data channel closed")
+//     logVoiceEvent("voice_session_ended", undefined, undefined, currentChatId)
+//   }
+
+//   dataChannel.onerror = (error) => {
+//     console.error("Data channel error:", error)
+//   }
+
+//   dataChannel.onopen = async () => {
+//     console.log("Data channel opened")
+//     currentChatId = await logVoiceEvent("voice_session_created", undefined, undefined, currentChatId)
+//     console.log("ChatId:", currentChatId)
+//   }
+
+//   dataChannel.onmessage = async (event) => {
+//     try {
+//       const data = JSON.parse(event.data)
+//       console.log("Received message :", data)
+
+//       if (data.type === "conversation.item.input_audio_transcription.completed") {
+//         console.log("User:", data.transcript)
+
+//         conversationHistoryRef.current.push({ role: "user", content: data.transcript })
+
+//         currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
+
+//         window.dispatchEvent(
+//           new CustomEvent("user-transcript", {
+//             detail: { type: "transcript", transcript: data.transcript },
+//           }),
+//         )
+
+//         const detectedLang = detectLanguage(data.transcript)
+//         if (languageRef.current !== detectedLang) {
+//           languageRef.current = detectedLang
+//           console.log("Language changed to:", detectedLang)
+//         }
+
+//         const voice = chooseVoiceFromLanguage(languageRef.current)
+//         console.log("Setting AI voice to:", voice)
+
+//         dataChannel.send(JSON.stringify({ type: "response.settings.update", settings: { voice } }))
+
+//         if (!hasSentCreateEvent) {
+//           hasSentCreateEvent = true
+//           dataChannel.send(JSON.stringify({ type: "response.create", response: {} }))
+//         }
+//       } else if (data.type === "response.audio_transcript.done") {
+//         console.log("AI:", data.transcript)
+
+//         conversationHistoryRef.current.push({ role: "assistant", content: data.transcript })
+
+//         currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
+
+//         window.dispatchEvent(
+//           new CustomEvent("ai-message", {
+//             detail: { type: "text", text: data.transcript },
+//           }),
+//         )
+//       } else if (data.type === "error") {
+//         console.error("Error from OpenAI:", data.error)
+//         window.dispatchEvent(
+//           new CustomEvent("ai-error", {
+//             detail: { error: data.error },
+//           }),
+//         )
+//       }
+//     } catch (error) {
+//       console.error("Error parsing message:", error)
+//     }
+//   }
+// }
+
 function setupDataChannel(
   dataChannel: RTCDataChannel,
   conversationHistoryRef: React.MutableRefObject<object[]>,
@@ -172,8 +300,6 @@ function setupDataChannel(
 ): void {
   let hasSentCreateEvent = false
   let currentChatId = chatId
-
-  // console.log("Setting up data channel...", conversationHistoryRef);
 
   dataChannel.onclose = () => {
     console.log("Data channel closed")
@@ -187,21 +313,28 @@ function setupDataChannel(
   dataChannel.onopen = async () => {
     console.log("Data channel opened")
     currentChatId = await logVoiceEvent("voice_session_created", undefined, undefined, currentChatId)
-    console.log("ChatId:", currentChatId)
+    console.log("ChatId after session creation:", currentChatId)
   }
 
   dataChannel.onmessage = async (event) => {
     try {
       const data = JSON.parse(event.data)
-      console.log("Received message :", data)
+      console.log("Received message from data channel:", data)
 
+      // Handle user speech transcript
       if (data.type === "conversation.item.input_audio_transcription.completed") {
-        console.log("User:", data.transcript)
+        console.log("User transcript received:", data.transcript)
 
+        // Add to conversation history
         conversationHistoryRef.current.push({ role: "user", content: data.transcript })
 
-        currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
+        // Log user speech to database
+        if (data.transcript && data.transcript.trim() !== "") {
+          currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
+          console.log("ChatId after user speech logged:", currentChatId)
+        }
 
+        // Dispatch event for UI updates
         window.dispatchEvent(
           new CustomEvent("user-transcript", {
             detail: { type: "transcript", transcript: data.transcript },
@@ -223,13 +356,21 @@ function setupDataChannel(
           hasSentCreateEvent = true
           dataChannel.send(JSON.stringify({ type: "response.create", response: {} }))
         }
-      } else if (data.type === "response.audio_transcript.done") {
-        console.log("AI:", data.transcript)
+      }
+      // Handle AI speech transcript
+      else if (data.type === "response.audio_transcript.done") {
+        console.log("AI transcript received:", data.transcript)
 
+        // Add to conversation history
         conversationHistoryRef.current.push({ role: "assistant", content: data.transcript })
 
-        currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
+        // Log AI speech to database
+        if (data.transcript && data.transcript.trim() !== "") {
+          currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
+          console.log("ChatId after AI speech logged:", currentChatId)
+        }
 
+        // Dispatch event for UI updates
         window.dispatchEvent(
           new CustomEvent("ai-message", {
             detail: { type: "text", text: data.transcript },
@@ -249,12 +390,13 @@ function setupDataChannel(
   }
 }
 
+// Add these helper functions at the end of the file
 function detectLanguage(text: string): "hindi" | "english" {
-  const hindiKeywords = ["नमस्ते", "आप", "क्या"]
+  const hindiKeywords = ["नमस्ते", "आप", "क्या", "है", "में", "के", "का", "की"]
   const hindiCount = hindiKeywords.filter((keyword) => text.includes(keyword)).length
   return hindiCount > 0 ? "hindi" : "english"
 }
 
 function chooseVoiceFromLanguage(language: "hindi" | "english"): string {
-  return language === "hindi" ? "hindi-voice" : "english-voice"
+  return language === "hindi" ? "alloy" : "alloy" // You can customize the voice IDs
 }
