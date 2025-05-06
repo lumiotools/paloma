@@ -21,32 +21,6 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  webpack: (config, { isServer, dev }) => {
-    // Only apply in development mode
-    if (dev && !isServer) {
-      // Ensure HMR is enabled
-      config.devServer = {
-        hot: true,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        // Force WebSockets to use HTTP protocol for compatibility
-        webSocketServer: {
-          type: 'ws',
-          options: {
-            path: '/_next/webpack-hmr',
-          },
-        }
-      }
-    }
-    
-    // If userConfig has webpack configuration, run it after this one
-    if (userConfig && userConfig.webpack) {
-      config = userConfig.webpack(config, { isServer, dev })
-    }
-    
-    return config
-  }
 }
 
 mergeConfig(nextConfig, userConfig)
