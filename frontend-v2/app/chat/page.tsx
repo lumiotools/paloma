@@ -109,7 +109,7 @@ export default function ChatPage() {
   const audioStreamRef = useRef<MediaStream | null>(null);
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const languageRef = useRef<"hindi" | "english">("hindi");
+  const languageRef = useRef<"hindi" | "english">("english");
 
   // Audio visualization refs
   const lastActivityTime = useRef<number>(0);

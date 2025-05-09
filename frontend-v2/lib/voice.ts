@@ -295,7 +295,7 @@ export async function logVoiceEvent(
 function setupDataChannel(
   dataChannel: RTCDataChannel,
   conversationHistoryRef: React.MutableRefObject<object[]>,
-  languageRef: React.MutableRefObject<"hindi" | "english">,
+  languageRef: React.MutableRefObject<"english" | "hindi">,
   chatId?: string | null,
 ): void {
   let hasSentCreateEvent = false
@@ -392,12 +392,34 @@ function setupDataChannel(
 
 // Add these helper functions at the end of the file
 function detectLanguage(text: string): "hindi" | "english" {
-  // Use more robust language detection, e.g. langdetect or similar library.
-  const hindiScore = calculateLanguageScore(text, "hindi");
-  const englishScore = calculateLanguageScore(text, "english");
-
-  return hindiScore > englishScore ? "hindi" : "english";
+  // No text provided, default to previously detected language
+  if (!text || text.trim() === "") {
+    return "english"; // Default to English if no text
+  }
+  
+  // Check for Hindi Unicode range (Devanagari)
+  const hindiPattern = /[\u0900-\u097F]/; // Devanagari Unicode range
+  const hasHindiChars = hindiPattern.test(text);
+  
+  // Common Hindi words - expanded list
+  const hindiWords = [
+    "नमस्ते", "आप", "क्या", "है", "में", "और", "का", "को", "से", "हैं", 
+    "मैं", "हम", "तुम", "वह", "यह", "कैसे", "क्यों", "कब", "कहाँ", "अच्छा", 
+    "ठीक", "धन्यवाद", "शुभ", "प्यार", "दिन", "रात", "समय", "बात"
+  ];
+  
+  // Check for common Hindi words
+  const words = text.toLowerCase().split(/\s+/);
+  const hindiWordCount = words.filter(word => hindiWords.includes(word)).length;
+  
+  // If we have Hindi characters or a significant number of Hindi words, classify as Hindi
+  if (hasHindiChars || (hindiWordCount > 0 && hindiWordCount / words.length > 0.2)) {
+    return "hindi";
+  }
+  
+  return "english";
 }
+
 
 function calculateLanguageScore(text: string, language: "hindi" | "english"): number {
   // Implement a more robust language scoring system
