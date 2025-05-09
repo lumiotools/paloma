@@ -1170,12 +1170,12 @@ export default function ChatPage() {
       }
 
       // Set a timeout to force close if the call-end event doesn't fire
-      setTimeout(() => {
-        if (isClosingVoiceMode) {
-          console.log("Force closing voice modal after timeout");
-          completeVoiceModeClose();
-        }
-      }, 1000);
+      // setTimeout(() => {
+      //   if (isClosingVoiceMode) {
+      //     console.log("Force closing voice modal after timeout");
+      //     completeVoiceModeClose();
+      //   }
+      // }, 1000);
     } else {
       // If no active call, close immediately
       completeVoiceModeClose();

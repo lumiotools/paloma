@@ -323,7 +323,7 @@ function setupDataChannel(
 
       // Handle user speech transcript
       if (data.type === "conversation.item.input_audio_transcription.completed") {
-        console.log("User transcript received:", data.transcript)
+        // console.log("User transcript received:", data.transcript)
 
         // Add to conversation history
         conversationHistoryRef.current.push({ role: "user", content: data.transcript })
@@ -331,7 +331,7 @@ function setupDataChannel(
         // Log user speech to database
         if (data.transcript && data.transcript.trim() !== "") {
           currentChatId = await logVoiceEvent("user_speech", data.transcript, undefined, currentChatId)
-          console.log("ChatId after user speech logged:", currentChatId)
+          // console.log("ChatId after user speech logged:", currentChatId)
         }
 
         // Dispatch event for UI updates
@@ -344,11 +344,11 @@ function setupDataChannel(
         const detectedLang = detectLanguage(data.transcript)
         if (languageRef.current !== detectedLang) {
           languageRef.current = detectedLang
-          console.log("Language changed to:", detectedLang)
+          // console.log("Language changed to:", detectedLang)
         }
 
         const voice = chooseVoiceFromLanguage(languageRef.current)
-        console.log("Setting AI voice to:", voice)
+        // console.log("Setting AI voice to:", voice)
 
         dataChannel.send(JSON.stringify({ type: "response.settings.update", settings: { voice } }))
 
@@ -359,7 +359,7 @@ function setupDataChannel(
       }
       // Handle AI speech transcript
       else if (data.type === "response.audio_transcript.done") {
-        console.log("AI transcript received:", data.transcript)
+        // console.log("AI transcript received:", data.transcript)
 
         // Add to conversation history
         conversationHistoryRef.current.push({ role: "assistant", content: data.transcript })
@@ -367,7 +367,7 @@ function setupDataChannel(
         // Log AI speech to database
         if (data.transcript && data.transcript.trim() !== "") {
           currentChatId = await logVoiceEvent("ai_speech", data.transcript, undefined, currentChatId)
-          console.log("ChatId after AI speech logged:", currentChatId)
+          // console.log("ChatId after AI speech logged:", currentChatId)
         }
 
         // Dispatch event for UI updates
@@ -392,11 +392,25 @@ function setupDataChannel(
 
 // Add these helper functions at the end of the file
 function detectLanguage(text: string): "hindi" | "english" {
-  const hindiKeywords = ["नमस्ते", "आप", "क्या", "है", "में", "के", "का", "की"]
-  const hindiCount = hindiKeywords.filter((keyword) => text.includes(keyword)).length
-  return hindiCount > 0 ? "hindi" : "english"
+  // Use more robust language detection, e.g. langdetect or similar library.
+  const hindiScore = calculateLanguageScore(text, "hindi");
+  const englishScore = calculateLanguageScore(text, "english");
+
+  return hindiScore > englishScore ? "hindi" : "english";
+}
+
+function calculateLanguageScore(text: string, language: "hindi" | "english"): number {
+  // Implement a more robust language scoring system
+  return text.split(" ").filter((word) => wordInLanguage(word, language)).length;
+}
+
+function wordInLanguage(word: string, language: "hindi" | "english"): boolean {
+  const hindiWords = ["नमस्ते", "आप", "क्या", "है", "में"];
+  const englishWords = ["hello", "how", "are", "you", "is"];
+  const words = language === "hindi" ? hindiWords : englishWords;
+  return words.includes(word);
 }
 
 function chooseVoiceFromLanguage(language: "hindi" | "english"): string {
-  return language === "hindi" ? "alloy" : "alloy" // You can customize the voice IDs
+  return language === "hindi" ? "alloy" : "alloy"; // Ensure this is accurate.
 }
